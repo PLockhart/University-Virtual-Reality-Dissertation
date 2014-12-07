@@ -1,0 +1,41 @@
+﻿Log file open, 12/06/14 18:48:01
+LogInit:Display: Running engine for game: BlankProj
+LogInit:Warning: Incompatible or missing module: UE4Editor-KinectV2.dll
+LogInit:Warning: Incompatible or missing module: UE4Editor-KinectV2Editor.dll
+Running J:/Program Files/Unreal Engine/4.5/Engine/Binaries/DotNET/UnrealBuildTool.exe BlankProj Development Win64 -project="J:/GitHub/CSC4001/UnrealProjs/BlankProj/BlankProj.uproject" -rocket -editorrecompile -progress
+Performing 5 actions (4 in parallel)
+VisualGestureDetector.cpp
+KinectPlayerController.cpp
+VisualGesture.cpp
+J:\Program Files\Unreal Engine\4.5\Engine\Source\Runtime\Core\Public\Windows\COMPointer.h(147) : error C2061: syntax error : identifier 'IUnknown'J:\Program Files\Unreal Engine\4.5\Engine\Source\Runtime\Core\Public\Windows\COMPointer.h(147) : error C2061: syntax error : identifier 'IUnknown'
+
+        J:\Program Files\Unreal Engine\4.5\Engine\Source\Runtime\Core\Public\Windows\COMPointer.h(159) : see reference to class template instantiation 'TComPtr<T>' being compiled        J:\Program Files\Unreal Engine\4.5\Engine\Source\Runtime\Core\Public\Windows\COMPointer.h(159) : see reference to class template instantiation 'TComPtr<T>' being compiled
+
+j:\github\csc4001\unrealprojs\blankproj\plugins\kinectv2\source\kinectv2\classes\KinectEventManager.h(32) : error C2079: 'KinectEventManager_eventNewSkeletonDetected_Parms::Skeleton' uses undefined struct 'FBody'
+j:\github\csc4001\unrealprojs\blankproj\plugins\kinectv2\source\kinectv2\classes\KinectEventManager.h(32) : error C2079: 'KinectEventManager_eventKinectBodyEventSigneture_Parms::Skeleton' uses undefined struct 'FBody'
+j:\github\csc4001\unrealprojs\blankproj\plugins\kinectv2\source\kinectv2\classes\KinectEventManager.h(32) : error C2079: 'KinectEventManager_eventKinectRawBodyFrameEvent_Parms::BodyFrame' uses undefined struct 'FBodyFrame'
+j:\github\csc4001\unrealprojs\blankproj\plugins\kinectv2\source\kinectv2\classes\KinectEventManager.h(32) : error C2079: 'KinectEventManager_eventNewSkeletonDetectedEvent_Parms::NewSkeleton' uses undefined struct 'FBody'
+j:\github\csc4001\unrealprojs\blankproj\plugins\kinectv2\source\kinectv2\classes\KinectEventManager.h(32) : error C2440: '=' : cannot convert from 'const FBody' to 'int'
+        Source or target has incomplete type
+j:\github\csc4001\unrealprojs\blankproj\plugins\kinectv2\source\kinectv2\classes\KinectEventManager.h(32) : error C2440: '=' : cannot convert from 'const FBodyFrame' to 'int'
+        Source or target has incomplete type
+-------- End Detailed Actions Stats -----------------------------------------------------------
+ERROR: UBT ERROR: Failed to produce item: J:\GitHub\CSC4001\UnrealProjs\BlankProj\Plugins\KinectV2\Binaries\Win64\UE4Editor-KinectV2.dll
+Cumulative action seconds (4 processors): 0.00 building projects, 2.24 compiling, 0.00 creating app bundles, 0.00 generating debug info, 0.00 linking, 0.00 other
+UBT execution time: 4.01 seconds
+LogExit: Preparing to exit.
+LogModuleManager: Shutting down and abandoning module DesktopPlatform (13)
+LogModuleManager: Shutting down and abandoning module TextureCompressor (12)
+LogModuleManager: Shutting down and abandoning module ShaderCore (11)
+LogModuleManager: Shutting down and abandoning module SlateRHIRenderer (10)
+LogModuleManager: Shutting down and abandoning module OpenGLDrv (9)
+LogModuleManager: Shutting down and abandoning module D3D11RHI (8)
+LogModuleManager: Shutting down and abandoning module Renderer (7)
+LogModuleManager: Shutting down and abandoning module Engine (6)
+LogModuleManager: Shutting down and abandoning module CoreUObject (5)
+LogModuleManager: Shutting down and abandoning module NetworkFile (4)
+LogModuleManager: Shutting down and abandoning module StreamingFile (3)
+LogModuleManager: Shutting down and abandoning module SandboxFile (2)
+LogModuleManager: Shutting down and abandoning module PakFile (1)
+LogExit: Exiting.
+Log file closed, 12/06/14 18:48:16
