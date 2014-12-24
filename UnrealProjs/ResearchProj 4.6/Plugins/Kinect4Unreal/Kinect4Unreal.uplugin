@@ -1,0 +1,22 @@
+{
+	"PluginFileVersion" : 3,
+
+	"FriendlyName" : "Kinect 4 Unreal",
+	"Version" : 1,
+	"VersionName" : "0.7",
+	"CreatedBy" : "Opaque Multimedia",
+	"CreatedByURL" : "www.opaquemultimedia.com",
+	"EngineVersion" : 1579795,
+	"Description" : "Beta buid of Kinect 4 Unreal plugin for testing purposes only",
+	"Category" : "Kinect",
+	"EnabledByDefault" : "true",
+	
+	"Modules" :
+	[		
+		{
+			"Name" : "Kinect4Unreal",
+			"Type" : "Runtime",
+			"LoadingPhase" : "PreDefault"
+		}
+	]
+}
