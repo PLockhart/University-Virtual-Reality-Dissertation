@@ -1,0 +1,23 @@
+C:\Users\neurosky\Downloads\ThinkGear SDK for .NET\ThinkGear SDK for .NET\Sample Projects\HelloEEG_EX\HelloEEG\bin\Debug\ConsoleApplication.exe.config
+C:\Users\neurosky\Downloads\ThinkGear SDK for .NET\ThinkGear SDK for .NET\Sample Projects\HelloEEG_EX\HelloEEG\bin\Debug\ConsoleApplication.exe
+C:\Users\neurosky\Downloads\ThinkGear SDK for .NET\ThinkGear SDK for .NET\Sample Projects\HelloEEG_EX\HelloEEG\bin\Debug\ConsoleApplication.pdb
+C:\Users\neurosky\Downloads\ThinkGear SDK for .NET\ThinkGear SDK for .NET\Sample Projects\HelloEEG_EX\HelloEEG\bin\Debug\ThinkGear.dll
+C:\Users\neurosky\Downloads\ThinkGear SDK for .NET\ThinkGear SDK for .NET\Sample Projects\HelloEEG_EX\HelloEEG\bin\Debug\Jayrock.Json.dll
+C:\Users\neurosky\Downloads\ThinkGear SDK for .NET\ThinkGear SDK for .NET\Sample Projects\HelloEEG_EX\HelloEEG\bin\Debug\NLog.dll
+C:\Users\neurosky\Downloads\ThinkGear SDK for .NET\ThinkGear SDK for .NET\Sample Projects\HelloEEG_EX\HelloEEG\bin\Debug\NLog.xml
+C:\Users\neurosky\Downloads\ThinkGear SDK for .NET\ThinkGear SDK for .NET\Sample Projects\HelloEEG_EX\HelloEEG\obj\x86\Debug\HelloEEG.csprojResolveAssemblyReference.cache
+C:\Users\neurosky\Downloads\ThinkGear SDK for .NET\ThinkGear SDK for .NET\Sample Projects\HelloEEG_EX\HelloEEG\obj\x86\Debug\ConsoleApplication.exe
+C:\Users\neurosky\Downloads\ThinkGear SDK for .NET\ThinkGear SDK for .NET\Sample Projects\HelloEEG_EX\HelloEEG\obj\x86\Debug\ConsoleApplication.pdb
+C:\Users\Peter\Documents\Peter\University\CSC 4001\Development\MindWave Dev\ThinkGear SDK for .NET\Sample Projects\HelloEEG\bin\Debug\ConsoleApplication.exe.config
+C:\Users\Peter\Documents\Peter\University\CSC 4001\Development\MindWave Dev\ThinkGear SDK for .NET\Sample Projects\HelloEEG\obj\x86\Debug\ConsoleApplication.exe
+C:\Users\Peter\Documents\Peter\University\CSC 4001\Development\MindWave Dev\ThinkGear SDK for .NET\Sample Projects\HelloEEG\obj\x86\Debug\ConsoleApplication.pdb
+C:\Users\Peter\Documents\Peter\University\CSC 4001\Development\MindWave Dev\ThinkGear SDK for .NET\Sample Projects\HelloEEG\bin\Debug\ConsoleApplication.exe
+C:\Users\Peter\Documents\Peter\University\CSC 4001\Development\MindWave Dev\ThinkGear SDK for .NET\Sample Projects\HelloEEG\bin\Debug\ConsoleApplication.pdb
+C:\Users\Peter\Documents\Peter\University\CSC 4001\Development\MindWave Dev\ThinkGear SDK for .NET\Sample Projects\HelloEEG\bin\Debug\ThinkGear.dll
+C:\Users\Peter\Documents\Peter\University\CSC 4001\Development\MindWave Dev\ThinkGear SDK for .NET\Sample Projects\HelloEEG\bin\Debug\Jayrock.Json.dll
+C:\Users\Peter\Documents\Peter\University\CSC 4001\Development\MindWave Dev\ThinkGear SDK for .NET\Sample Projects\HelloEEG\bin\Debug\NLog.dll
+C:\Users\Peter\Documents\Peter\University\CSC 4001\Development\MindWave Dev\ThinkGear SDK for .NET\Sample Projects\HelloEEG\bin\Debug\NLog.xml
+C:\Users\Peter\Documents\Peter\University\CSC 4001\Development\MindWave Dev\ThinkGear SDK for .NET\Sample Projects\HelloEEG\obj\x86\Debug\HelloEEG.csprojResolveAssemblyReference.cache
+J:\GitHub\CSC4001\Misc\ThinkGear SDK for .NET\Sample Projects\HelloEEG\bin\Debug\ConsoleApplication.exe.config
+J:\GitHub\CSC4001\Misc\ThinkGear SDK for .NET\Sample Projects\HelloEEG\obj\x86\Debug\ConsoleApplication.exe
+J:\GitHub\CSC4001\Misc\ThinkGear SDK for .NET\Sample Projects\HelloEEG\obj\x86\Debug\ConsoleApplication.pdb

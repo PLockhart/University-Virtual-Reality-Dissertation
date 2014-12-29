@@ -1,5 +1,0 @@
-﻿  thinkgear_testapp.c
-j:\github\csc4001\misc\testmindwave\thinkgear_testapp.c(104): warning C4047: 'function' : 'char *' differs in levels of indirection from 'char (*)[26]'
-j:\github\csc4001\misc\testmindwave\thinkgear_testapp.c(104): warning C4024: 'ctime_s' : different types for formal and actual parameter 1
-j:\github\csc4001\misc\testmindwave\thinkgear_testapp.c(104): warning C4047: '=' : 'char *' differs in levels of indirection from 'errno_t'
-  TestMindwave.vcxproj -> J:\GitHub\CSC4001\Misc\TestMindwave\Debug\TestMindwave.exe
