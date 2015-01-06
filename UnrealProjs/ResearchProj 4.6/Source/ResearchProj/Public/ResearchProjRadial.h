@@ -8,7 +8,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(abstract)
 class RESEARCHPROJ_API AResearchProjRadial : public ARadialHUD
 {
 	GENERATED_BODY()

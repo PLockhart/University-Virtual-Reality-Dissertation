@@ -4,14 +4,14 @@
 #include "RadialHUD.h"
 
 //FRADIAL STRUCTS
-void FRadialItem::OnInteractWith(ARadialHUD * caller) {
+void FRadialItem::onInteractWith(ARadialHUD * caller) {
 
 	SelectedEvent.ExecuteIfBound(this);
 }
 
-void FRadialItemContainer::OnInteractWith(ARadialHUD * caller) {
+void FRadialItemContainer::onInteractWith(ARadialHUD * caller) {
 	
-	FRadialItem::OnInteractWith(caller);
+	FRadialItem::onInteractWith(caller);
 	caller->displayItems(ChildItems);
 }
 
@@ -20,30 +20,45 @@ void FRadialItemContainer::OnInteractWith(ARadialHUD * caller) {
 ARadialHUD::ARadialHUD(const FObjectInitializer& ObjectInitializer)
 : Super(ObjectInitializer) {
 
-	buildRootItems(RootItems);
+}
 
-	_isActive = false;
-	if (this->bShowHUD == true)
-		AHUD::ShowHUD();
+void ARadialHUD::BeginPlay() {
+
+	AHUD::BeginPlay();
+
+	UE_LOG(LogTemp, Warning, TEXT("Begin Play Code"));
+	buildRootItems(RootItems);
 }
 
 void ARadialHUD::startInteracting(FVector startPos) {
 
 	_origin = startPos;
-
-	if (this->bShowHUD == false)
-		AHUD::ShowHUD();
-
-	_isActive = true;
 }
 
 void ARadialHUD::displayItems(FRadialItem items[MAX_RADIAL_PER_LEVEL]) {
 
+	TArray<FRadialItem> itemsDynamic;
+	itemsDynamic.Init(0);
+	
+	int i = 0;
+	while (i < MAX_RADIAL_PER_LEVEL) {
+
+		//unbind it so empty buttons do nothing
+		//TODO: work out if hidden buttons can be pressed so as to avoid this step
+		if (items[i].isStructEmpty() == true)
+			items[i].SelectedEvent.Unbind();
+		else
+			itemsDynamic.Add(items[i]);
+
+		i++;
+	}
+
+	assignWidgetsForItems(itemsDynamic);
 }
 
-void ARadialHUD::selectRadialItem(FRadialItem& selectedItem) {
+void ARadialHUD::selectRadialItem(FRadialItem selectedItem) {
 
-	selectedItem.OnInteractWith(this);
+	selectedItem.onInteractWith(this);
 }
 
 void ARadialHUD::buildRootItems(FRadialItem(&itemStore)[MAX_RADIAL_PER_LEVEL]) {
@@ -53,8 +68,45 @@ void ARadialHUD::buildRootItems(FRadialItem(&itemStore)[MAX_RADIAL_PER_LEVEL]) {
 
 void ARadialHUD::dismissHUD() {
 
-	_isActive = false;
+	if (_isActive == true) {
 
-	if (this->bShowHUD == true)
-		AHUD::ShowHUD();
+		_isActive = false;
+		setRadialGUIWidgetVisbility(false);
+	}
+}
+
+void ARadialHUD::revealHUD() {
+
+	if (_isActive == false) {
+
+		_isActive = true;
+		setRadialGUIWidgetVisbility(true);
+		displayItems(RootItems);
+	}
+}
+
+void ARadialHUD::setRadialGUIWidgetVisbility_Implementation(bool isVisible) {
+
+	UE_LOG(LogTemp, Error, TEXT("Implement this method in blueprints to change the visiblity of your GUI to the parameter"));
+}
+
+void ARadialHUD::assignWidgetsForItems_Implementation(const TArray<FRadialItem> &items) {
+
+	UE_LOG(LogTemp, Error, TEXT("Implement this method in blueprints to assign the widgets in your GUI to match up to the array's display names"));
+}
+
+void ARadialHUD::getRadialItemData(FRadialItem theItem, FString &displayName, bool &isEmpty) {
+
+	displayName = theItem.getDisplayName();
+	isEmpty = theItem.isStructEmpty();
+}
+
+FVector ARadialHUD::getOriginPosition() {
+
+	return _origin;
+}
+
+bool ARadialHUD::isRadialActive() {
+
+	return _isActive;
 }
