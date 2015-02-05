@@ -2,21 +2,22 @@
 	"PluginFileVersion" : 3,
 
 	"FriendlyName" : "Kinect 4 Unreal",
-	"Version" : 1,
-	"VersionName" : "0.7",
+	"Version" : 1.1,
+	"VersionName" : "1.1",
 	"CreatedBy" : "Opaque Multimedia",
 	"CreatedByURL" : "www.opaquemultimedia.com",
 	"EngineVersion" : 1579795,
-	"Description" : "Beta buid of Kinect 4 Unreal plugin for testing purposes only",
+	"Description" : "Kinect 4 Unreal enables the use of Kinect 2 for Windows in Unreal 4",
 	"Category" : "Kinect",
 	"EnabledByDefault" : "true",
-	
+
 	"Modules" :
-	[		
+	[
 		{
 			"Name" : "Kinect4Unreal",
 			"Type" : "Runtime",
-			"LoadingPhase" : "PreDefault"
+			"WhitelistPlatforms" : [ "Win64" ],
+            "LoadingPhase" : "PreDefault"
 		}
 	]
 }
