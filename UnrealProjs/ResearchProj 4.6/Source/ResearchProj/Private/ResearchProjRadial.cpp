@@ -12,7 +12,8 @@ void AResearchProjRadial::buildRootItems(FRadialItem (&itemStore)[MAX_RADIAL_PER
 	
 	using namespace std::placeholders; // for `_1`
 	FRadialItem exitNode = FRadialItem(FString(TEXT("Exit")));
-	exitNode.SelectedEvent.BindUObject(this, &AResearchProjRadial::exitNodeCallback);
+	//default behaviour of a node is to close anyway
+	//exitNode.SelectedEvent.BindUObject(this, &AResearchProjRadial::exitNodeCallback);
 	itemStore[0] = exitNode;
 }
 

@@ -38,11 +38,9 @@ public:
 		_isStructEmpty = true;
 	}
 	/*Called when clicked on through the GUI.
-	Calls the selectedEvent method*/
 	virtual void onInteractWith(ARadialHUD * caller);
 
 	/*Returns whether the struct is empty, or whether values have been set*/
-	//UFUNCTION(BlueprintCallable, Category = "RadialItem")
 	bool isStructEmpty() {
 
 		return _isStructEmpty;

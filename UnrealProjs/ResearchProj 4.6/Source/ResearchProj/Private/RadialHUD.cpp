@@ -7,11 +7,12 @@
 void FRadialItem::onInteractWith(ARadialHUD * caller) {
 
 	SelectedEvent.ExecuteIfBound(this);
+	caller->dismissHUD();
 }
 
 void FRadialItemContainer::onInteractWith(ARadialHUD * caller) {
 	
-	FRadialItem::onInteractWith(caller);
+	SelectedEvent.ExecuteIfBound(this);
 	caller->displayItems(ChildItems);
 }
 
