@@ -38,6 +38,7 @@ public:
 		_isStructEmpty = true;
 	}
 	/*Called when clicked on through the GUI.
+	*/
 	virtual void onInteractWith(ARadialHUD * caller);
 
 	/*Returns whether the struct is empty, or whether values have been set*/
