@@ -4,6 +4,7 @@
 
 #include <functional>
 #include "GameFramework/HUD.h"
+#include <string>
 
 #include "RadialHUD.generated.h"
 
@@ -18,61 +19,54 @@ struct FRadialItem {
 
 private:
 	//VARIABLES
-	FString _displayText;	//the text to be displayed in the GUI
+	std::string _displayText;	//the text to be displayed in the GUI
 	bool _isStructEmpty;	//flag for whether the struct is empty or if data has been set
-	
+	bool _isContainer;	//Flag for whether t his struct contains children
+	FRadialItem * _childItems;	//the children this struct contains. May be null
+	int _numChildren;
+
 public:
 	DECLARE_DELEGATE_OneParam(RadialItemDelegate, FRadialItem*const);
 	RadialItemDelegate SelectedEvent;
 
 	//METHODS
-	FRadialItem(FString name) {
+	//create a radial node
+	FRadialItem(std::string name);
+	/*create a container radial item
+	This struct will free memory of the children passed here.
+	Children should be th
+	*/
+	FRadialItem(std::string name, FRadialItem children[MAX_RADIAL_PER_LEVEL]);
+	//default non-valid constructor
+	FRadialItem();
+	~FRadialItem();
 
-		_displayText = name;
-		_isStructEmpty = false;
-	}
-
-	FRadialItem() {
-
-		_displayText = FString(TEXT("Unnamed"));
-		_isStructEmpty = true;
-	}
 	/*Called when clicked on through the GUI.
 	*/
 	virtual void onInteractWith(ARadialHUD * caller);
 
 	/*Returns whether the struct is empty, or whether values have been set*/
-	bool isStructEmpty() {
+	bool isStructEmpty() const {
 
 		return _isStructEmpty;
 	}
 
+	/*Returns whether this struct is a normal node or whether it contains children*/
+	bool isStructContainer() const {
+
+		return _isContainer;
+	}
+
+	/*Gets the children of this struct. Check to see if it is a container 1st.
+	Array will be the length of MAX_RADIAL_PER_LEVEL*/
+	TArray<FRadialItem*> getChildren();
+
 	//UFUNCTION(BlueprintCallable, Category = "RadialItem")
-	FString getDisplayName() {
+	std::string getDisplayName() const {
 
 		return _displayText;
 	}
 };
-
-USTRUCT()
-struct FRadialItemContainer : public FRadialItem {
-
-	GENERATED_USTRUCT_BODY()
-
-public:
-	FRadialItemContainer(FString name)
-		: FRadialItem(name) {
-	}
-	FRadialItemContainer() {
-
-	}
-	FRadialItem ChildItems[MAX_RADIAL_PER_LEVEL];	//the radial items this radial item contains
-
-	/*Called when clicked on through the GUI
-	Sets the caller to display its child items*/
-	virtual void onInteractWith(ARadialHUD * caller);
-};
-
 
 /**
  * 
@@ -83,8 +77,9 @@ class RESEARCHPROJ_API ARadialHUD : public AHUD
 	GENERATED_BODY()
 
 	//VARIABLES
-public:
-		FRadialItem RootItems[MAX_RADIAL_PER_LEVEL];	//the root items to be displayed
+protected:
+	UPROPERTY()
+	TArray<FRadialItem> RootItems;	//the root items to be displayed
 private:
 	FVector _origin;	//the origin of the radial menu
 
@@ -104,7 +99,12 @@ public:
 	/*Displays the array of radial items.
 	This will trigger the system to call the blueprint event that will
 	implement the assignment of widgets*/
-	void displayItems(FRadialItem items[MAX_RADIAL_PER_LEVEL]);
+	void displayItems(const TArray<FRadialItem*> & items);
+
+	/*Displays the array of radial items.
+	This will trigger the system to call the blueprint event that will
+	implement the assignment of widgets*/
+	void displayItems(const TArray<FRadialItem> & items);
 
 	/*select the parameter as the item clicked on*/
 	UFUNCTION(BlueprintCallable, Category = "RadialHUD")
@@ -136,15 +136,15 @@ public:
 
 	/*Gets the origin position that the radial hud started interacting at*/
 	UFUNCTION(BlueprintCallable, Category = "RadialHUD")
-	FVector getOriginPosition();
+	FVector getOriginPosition() const;
 
 	/*Returns true if the radial hud is active and being used*/
 	UFUNCTION(BlueprintCallable, Category = "RadialHUD")
-	bool isRadialActive();
+	bool isRadialActive() const;
 
 
 protected:
 	/*Build the root items for this radial hud.
 	Base class will nullify all the indexes 1st for convenience*/
-	virtual void buildRootItems(FRadialItem(&itemStore)[MAX_RADIAL_PER_LEVEL]);
+	virtual void buildRootItems(TArray<FRadialItem> & itemStore);
 };

@@ -3,17 +3,72 @@
 #include "ResearchProj.h"
 #include "RadialHUD.h"
 
+#include <iostream>
+
 //FRADIAL STRUCTS
+
+//METHODS
+FRadialItem::FRadialItem(std::string name) {
+
+	_displayText = name;
+	_isStructEmpty = false;
+	_isContainer = false;
+	_numChildren = 0;
+}
+FRadialItem::FRadialItem(std::string name, FRadialItem children[MAX_RADIAL_PER_LEVEL]) {
+
+	_numChildren = 0;
+	for (int i = 0; i < MAX_RADIAL_PER_LEVEL; i++) {
+
+		if (children[i].isStructEmpty() == false)
+			_numChildren++;
+	}
+
+	_childItems = children;
+
+	_displayText = name;
+	_isStructEmpty = false;
+	_isContainer = true;
+}
+
+FRadialItem::FRadialItem() {
+
+	_displayText = "Unnamed";
+	_isStructEmpty = true;
+	_isContainer = false;
+	_numChildren = 0;
+}
+FRadialItem::~FRadialItem() {
+
+	delete _childItems;
+}
+
 void FRadialItem::onInteractWith(ARadialHUD * caller) {
 
 	SelectedEvent.ExecuteIfBound(this);
-	caller->dismissHUD();
+
+	if (isStructContainer() == true) {
+
+		TArray<FRadialItem*> items = getChildren();
+		caller->displayItems(items);
+	}
 }
 
-void FRadialItemContainer::onInteractWith(ARadialHUD * caller) {
-	
-	SelectedEvent.ExecuteIfBound(this);
-	caller->displayItems(ChildItems);
+TArray<FRadialItem*> FRadialItem::getChildren() {
+
+	TArray<FRadialItem*> c;
+	c.Init(0);
+
+	if (isStructContainer() == true) {
+
+		for (int i = 0; i < _numChildren; i++) {
+			c.Add(&_childItems[i]);
+		}
+	}
+	else
+		UE_LOG(LogTemp, Error, TEXT("Trying to get children from non-container FRadial HUD"));
+
+	return c;
 }
 
 //ARADIAL HUD
@@ -27,7 +82,7 @@ void ARadialHUD::BeginPlay() {
 
 	AHUD::BeginPlay();
 
-	UE_LOG(LogTemp, Warning, TEXT("Begin Play Code"));
+	RootItems.Init(0);
 	buildRootItems(RootItems);
 }
 
@@ -36,25 +91,32 @@ void ARadialHUD::startInteracting(FVector startPos) {
 	_origin = startPos;
 }
 
-void ARadialHUD::displayItems(FRadialItem items[MAX_RADIAL_PER_LEVEL]) {
+void ARadialHUD::displayItems(const TArray<FRadialItem> & items) {
+
+	if (items.Num() > MAX_RADIAL_PER_LEVEL)
+		UE_LOG(LogTemp, Error, TEXT("Trying to display items more than the max radial per level"));
+
+	assignWidgetsForItems(items);
+}
+
+void ARadialHUD::displayItems(const TArray<FRadialItem*> & items) {
 
 	TArray<FRadialItem> itemsDynamic;
 	itemsDynamic.Init(0);
-	
+
 	int i = 0;
-	while (i < MAX_RADIAL_PER_LEVEL) {
+	while (i < MAX_RADIAL_PER_LEVEL && i < items.Num()) {
+
+		FRadialItem * loopedItem = items[i];
 
 		//unbind it so empty buttons do nothing
-		//TODO: work out if hidden buttons can be pressed so as to avoid this step
-		if (items[i].isStructEmpty() == true)
-			items[i].SelectedEvent.Unbind();
-		else
-			itemsDynamic.Add(items[i]);
+		if (loopedItem->isStructEmpty() == false)
+			itemsDynamic.Add(*loopedItem);
 
 		i++;
 	}
 
-	assignWidgetsForItems(itemsDynamic);
+	displayItems(itemsDynamic);
 }
 
 void ARadialHUD::selectRadialItem(FRadialItem selectedItem) {
@@ -62,7 +124,7 @@ void ARadialHUD::selectRadialItem(FRadialItem selectedItem) {
 	selectedItem.onInteractWith(this);
 }
 
-void ARadialHUD::buildRootItems(FRadialItem(&itemStore)[MAX_RADIAL_PER_LEVEL]) {
+void ARadialHUD::buildRootItems(TArray<FRadialItem> & itemStore) {
 
 	//unreal why you no support pure virtual functions
 }
@@ -98,16 +160,16 @@ void ARadialHUD::assignWidgetsForItems_Implementation(const TArray<FRadialItem> 
 
 void ARadialHUD::getRadialItemData(FRadialItem theItem, FString &displayName, bool &isEmpty) {
 
-	displayName = theItem.getDisplayName();
+	displayName = FString(theItem.getDisplayName().c_str());
 	isEmpty = theItem.isStructEmpty();
 }
 
-FVector ARadialHUD::getOriginPosition() {
+FVector ARadialHUD::getOriginPosition() const {
 
 	return _origin;
 }
 
-bool ARadialHUD::isRadialActive() {
+bool ARadialHUD::isRadialActive() const {
 
 	return _isActive;
 }

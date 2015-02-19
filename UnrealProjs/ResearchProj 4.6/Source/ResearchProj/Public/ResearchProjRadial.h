@@ -19,9 +19,12 @@ public:
 	AResearchProjRadial(const FObjectInitializer& ObjectInitializer);
 
 protected:
-	virtual void buildRootItems(FRadialItem (&itemStore)[MAX_RADIAL_PER_LEVEL]);
+	virtual void buildRootItems(TArray<FRadialItem> & itemStore);
 
 private:
 	/*Method called by the exit node to dismiss the hud*/
 	void exitNodeCallback(FRadialItem * const calledItem);
+
+	void print1(FRadialItem * const calledItem);
+	void print2(FRadialItem * const calledItem);
 };
