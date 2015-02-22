@@ -40,7 +40,8 @@ FRadialItem::FRadialItem() {
 }
 FRadialItem::~FRadialItem() {
 
-	delete _childItems;
+	if (_isContainer == true)
+		delete _childItems;
 }
 
 void FRadialItem::onInteractWith(ARadialHUD * caller) {
