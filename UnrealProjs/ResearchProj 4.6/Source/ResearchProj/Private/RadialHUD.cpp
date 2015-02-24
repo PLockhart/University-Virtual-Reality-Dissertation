@@ -15,6 +15,7 @@ FRadialItem::FRadialItem(std::string name) {
 	_isContainer = false;
 	_numChildren = 0;
 }
+
 FRadialItem::FRadialItem(std::string name, FRadialItem children[MAX_RADIAL_PER_LEVEL]) {
 
 	_numChildren = 0;
@@ -31,6 +32,7 @@ FRadialItem::FRadialItem(std::string name, FRadialItem children[MAX_RADIAL_PER_L
 	_isContainer = true;
 }
 
+
 FRadialItem::FRadialItem() {
 
 	_displayText = "Unnamed";
@@ -38,11 +40,23 @@ FRadialItem::FRadialItem() {
 	_isContainer = false;
 	_numChildren = 0;
 }
-FRadialItem::~FRadialItem() {
+/*
+void FRadialItem::addChild(FRadialItem newItem) {
 
-	if (_isContainer == true)
-		delete _childItems;
+	if (isStructContainer() == false) {
+
+		_numChildren = 0;
+		_childItems = new FRadialItem[MAX_RADIAL_PER_LEVEL];
+		_isContainer = true;
+	}
+
+	if (_numChildren < MAX_RADIAL_PER_LEVEL) {
+
+		_childItems[_numChildren] = newItem;
+		_numChildren++;
+	}
 }
+*/
 
 void FRadialItem::onInteractWith(ARadialHUD * caller) {
 

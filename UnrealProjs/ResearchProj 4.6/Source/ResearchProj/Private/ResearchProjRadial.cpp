@@ -11,19 +11,28 @@ AResearchProjRadial::AResearchProjRadial(const FObjectInitializer& ObjectInitial
 
 }
 
+void AResearchProjRadial::BeginDestroy() {
+
+	ARadialHUD::BeginDestroy();
+
+	for (std::vector<FRadialItem*>::iterator it = _arraysToFree.begin(); it != _arraysToFree.end(); ++it)
+		delete[](*it);
+}
+
 void AResearchProjRadial::buildRootItems(TArray<FRadialItem> &itemStore) {
 	
 	FRadialItem exitNode = FRadialItem("Exit");
 	exitNode.SelectedEvent.BindUObject(this, &AResearchProjRadial::exitNodeCallback);
 	itemStore.Add(exitNode);
 	
-	FRadialItem * testChildren = new FRadialItem[MAX_RADIAL_PER_LEVEL];
-	testChildren[0] = FRadialItem("1");
-	testChildren[0].SelectedEvent.BindUObject(this, &AResearchProjRadial::print1);
-	testChildren[1] = FRadialItem("2");
-	testChildren[1].SelectedEvent.BindUObject(this, &AResearchProjRadial::print2);
-	itemStore.Add(FRadialItem("Test", testChildren));
-	
+	FRadialItem * camControls = new FRadialItem[MAX_RADIAL_PER_LEVEL];
+	_arraysToFree.push_back(camControls);
+	camControls[0] = FRadialItem("Forward");
+	camControls[0].SelectedEvent.BindUObject(this, &AResearchProjRadial::camForward);
+	camControls[1] = exitNode;
+	camControls[2] = FRadialItem("Reverse");
+	camControls[2].SelectedEvent.BindUObject(this, &AResearchProjRadial::camBack);
+	itemStore.Add(FRadialItem("CamControls", camControls));
 }
 
 void AResearchProjRadial::exitNodeCallback(FRadialItem * const calledItem) {
@@ -31,14 +40,12 @@ void AResearchProjRadial::exitNodeCallback(FRadialItem * const calledItem) {
 	dismissHUD();
 }
 
-void AResearchProjRadial::print1(FRadialItem * const calledItem) {
+void AResearchProjRadial::camForward(FRadialItem * const calledItem) {
 	
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, "Test 1");
-	dismissHUD();
+	
 }
 
-void AResearchProjRadial::print2(FRadialItem * const calledItem) {
+void AResearchProjRadial::camBack(FRadialItem * const calledItem) {
 
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, "Test 2");
-	dismissHUD();
+	
 }

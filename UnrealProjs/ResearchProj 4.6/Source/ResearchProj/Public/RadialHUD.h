@@ -3,8 +3,8 @@
 #pragma once
 
 #include <functional>
-#include "GameFramework/HUD.h"
 #include <string>
+#include "GameFramework/HUD.h"
 
 #include "RadialHUD.generated.h"
 
@@ -33,13 +33,14 @@ public:
 	//create a radial node
 	FRadialItem(std::string name);
 	/*create a container radial item
-	This struct will free memory of the children passed here.
-	Children should be th
 	*/
 	FRadialItem(std::string name, FRadialItem children[MAX_RADIAL_PER_LEVEL]);
 	//default non-valid constructor
 	FRadialItem();
-	~FRadialItem();
+
+	/*adds a child to the container.
+	If the item isn't a container already it will turn it into one*/
+	//void addChild(FRadialItem newItem);
 
 	/*Called when clicked on through the GUI.
 	*/

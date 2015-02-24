@@ -3,6 +3,7 @@
 #pragma once
 
 #include "RadialHUD.h"
+#include <vector>
 #include "ResearchProjRadial.generated.h"
 
 /**
@@ -12,11 +13,15 @@ UCLASS(abstract)
 class RESEARCHPROJ_API AResearchProjRadial : public ARadialHUD
 {
 	GENERATED_BODY()
+
+	//VARIABLES
+	std::vector<FRadialItem*> _arraysToFree;
 	
 	//METHODS
 	/*constructor*/
 public:
 	AResearchProjRadial(const FObjectInitializer& ObjectInitializer);
+	virtual void BeginDestroy();
 
 protected:
 	virtual void buildRootItems(TArray<FRadialItem> & itemStore);
@@ -25,6 +30,6 @@ private:
 	/*Method called by the exit node to dismiss the hud*/
 	void exitNodeCallback(FRadialItem * const calledItem);
 
-	void print1(FRadialItem * const calledItem);
-	void print2(FRadialItem * const calledItem);
+	void camForward(FRadialItem * const calledItem);
+	void camBack(FRadialItem * const calledItem);
 };
