@@ -117,7 +117,7 @@ public:
 	
 	/*Override this function in blueprints. In this function, you should
 	set the visiblity of the radial gui to the parameter*/
-	UFUNCTION(BlueprintNativeEvent, Category = "RadialHUD")
+	UFUNCTION(BlueprintImplementableEvent, Category = "RadialHUD")
 	void setRadialGUIWidgetVisbility(bool isVisible);
 	
 	/*Show the hud*/
@@ -126,7 +126,7 @@ public:
 
 	/*Override this function in blueprints. Given the array of items,
 	You use the structs data to hide buttons and set text labels*/
-	UFUNCTION(BlueprintNativeEvent, Category = "RadialHUD")
+	UFUNCTION(BlueprintImplementableEvent, Category = "RadialHUD")
 	void assignWidgetsForItems(const TArray<FRadialItem> & items);
 
 	//GETTERS 

@@ -6,6 +6,8 @@
 #include "EngineGlobals.h"
 #include "Engine.h"
 
+#define XAXISMOVEMENT 5
+
 AResearchProjRadial::AResearchProjRadial(const FObjectInitializer& ObjectInitializer)
 : Super(ObjectInitializer) {
 
@@ -35,6 +37,7 @@ void AResearchProjRadial::buildRootItems(TArray<FRadialItem> &itemStore) {
 	itemStore.Add(FRadialItem("CamControls", camControls));
 }
 
+
 void AResearchProjRadial::exitNodeCallback(FRadialItem * const calledItem) {
 
 	dismissHUD();
@@ -42,10 +45,10 @@ void AResearchProjRadial::exitNodeCallback(FRadialItem * const calledItem) {
 
 void AResearchProjRadial::camForward(FRadialItem * const calledItem) {
 	
-	
+	adjustCameraBy(FVector(XAXISMOVEMENT, 0, 0));
 }
 
 void AResearchProjRadial::camBack(FRadialItem * const calledItem) {
 
-	
+	adjustCameraBy(FVector(-XAXISMOVEMENT, 0, 0));
 }

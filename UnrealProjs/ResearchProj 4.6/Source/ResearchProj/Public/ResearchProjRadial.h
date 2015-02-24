@@ -23,6 +23,9 @@ public:
 	AResearchProjRadial(const FObjectInitializer& ObjectInitializer);
 	virtual void BeginDestroy();
 
+	UFUNCTION(BlueprintImplementableEvent, Category = "Research Project HUD")
+	void adjustCameraBy(FVector offset);
+
 protected:
 	virtual void buildRootItems(TArray<FRadialItem> & itemStore);
 

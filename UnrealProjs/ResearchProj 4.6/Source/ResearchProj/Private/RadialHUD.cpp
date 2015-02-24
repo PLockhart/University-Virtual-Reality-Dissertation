@@ -162,7 +162,7 @@ void ARadialHUD::revealHUD() {
 		displayItems(RootItems);
 	}
 }
-
+/*
 void ARadialHUD::setRadialGUIWidgetVisbility_Implementation(bool isVisible) {
 
 	UE_LOG(LogTemp, Error, TEXT("Implement this method in blueprints to change the visiblity of your GUI to the parameter"));
@@ -172,6 +172,7 @@ void ARadialHUD::assignWidgetsForItems_Implementation(const TArray<FRadialItem> 
 
 	UE_LOG(LogTemp, Error, TEXT("Implement this method in blueprints to assign the widgets in your GUI to match up to the array's display names"));
 }
+*/
 
 void ARadialHUD::getRadialItemData(FRadialItem theItem, FString &displayName, bool &isEmpty) {
 
