@@ -1,1 +1,14 @@
 J:\GitHub\CSC4001\MindWaveExperimentRecorder\MindWaveExperimentRecorder\bin\Debug\MindWaveExperimentRecorder.exe.config
+J:\GitHub\CSC4001\MindWaveExperimentRecorder\MindWaveExperimentRecorder\obj\Debug\MindWaveExperimentRecorder.csprojResolveAssemblyReference.cache
+J:\GitHub\CSC4001\MindWaveExperimentRecorder\MindWaveExperimentRecorder\obj\Debug\MindWaveExperimentRecorder.Form1.resources
+J:\GitHub\CSC4001\MindWaveExperimentRecorder\MindWaveExperimentRecorder\obj\Debug\MindWaveExperimentRecorder.Properties.Resources.resources
+J:\GitHub\CSC4001\MindWaveExperimentRecorder\MindWaveExperimentRecorder\obj\Debug\MindWaveExperimentRecorder.csproj.GenerateResource.Cache
+J:\GitHub\CSC4001\MindWaveExperimentRecorder\MindWaveExperimentRecorder\bin\Debug\MindWaveExperimentRecorder.exe
+J:\GitHub\CSC4001\MindWaveExperimentRecorder\MindWaveExperimentRecorder\bin\Debug\MindWaveExperimentRecorder.pdb
+J:\GitHub\CSC4001\MindWaveExperimentRecorder\MindWaveExperimentRecorder\bin\Debug\ThinkGear.dll
+J:\GitHub\CSC4001\MindWaveExperimentRecorder\MindWaveExperimentRecorder\bin\Debug\Jayrock.Json.dll
+J:\GitHub\CSC4001\MindWaveExperimentRecorder\MindWaveExperimentRecorder\bin\Debug\NLog.dll
+J:\GitHub\CSC4001\MindWaveExperimentRecorder\MindWaveExperimentRecorder\bin\Debug\NLog.xml
+J:\GitHub\CSC4001\MindWaveExperimentRecorder\MindWaveExperimentRecorder\obj\Debug\MindWaveExperimentRecorder.exe
+J:\GitHub\CSC4001\MindWaveExperimentRecorder\MindWaveExperimentRecorder\obj\Debug\MindWaveExperimentRecorder.pdb
+J:\GitHub\CSC4001\MindWaveExperimentRecorder\MindWaveExperimentRecorder\obj\Debug\MindWaveExperimentRecorder.csproj.ResolveComReference.cache
