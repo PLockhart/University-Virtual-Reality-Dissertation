@@ -78,5 +78,9 @@ namespace MindWaveExperimentRecorder.CSCExperimentor
         /// </summary>
         void exportAllExperiments(String filePath);
 
+        /// <summary>
+        /// Shuts down the experiment without saving
+        /// </summary>
+        void shutdown();
     }
 }

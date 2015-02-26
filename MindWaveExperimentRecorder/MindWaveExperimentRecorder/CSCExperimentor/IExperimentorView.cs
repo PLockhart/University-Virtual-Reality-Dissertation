@@ -22,6 +22,12 @@ namespace MindWaveExperimentRecorder.CSCExperimentor
         void updateExperimentLabel(string name);
 
         /// <summary>
+        /// Updates the UI according to whether data is being recorded or not
+        /// </summary>
+        /// <param name="state">If true, data is being recorded</param>
+        void updateIsRecordingUI(bool state);
+
+        /// <summary>
         /// Adds a message to the streaming log
         /// </summary>
         /// <param name="message"></param>
