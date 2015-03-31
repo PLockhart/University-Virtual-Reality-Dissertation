@@ -57,8 +57,9 @@ namespace MindWaveExperimentRecorder.CSCExperimentor
         /// <summary>
         /// Starts a new experiment. Unsaved data will be lost
         /// </summary>
-        /// <param name="id">unique id for this experiment</param>
-        void startNewExperiment(int id);
+        /// <param name="id">unique id for this experiment.</param>
+        /// <param name="isVR">Whether the experiment is VR or not</param>
+        void startNewExperiment(string id, bool isVR);
 
         /// <summary>
         /// Adds a new record to the currently running experiment

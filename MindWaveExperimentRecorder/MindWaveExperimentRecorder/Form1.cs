@@ -90,17 +90,17 @@ namespace MindWaveExperimentRecorder
 
         private void exp1Button_Click(object sender, EventArgs e)
         {
-            _manager.startNewExperiment(1);
+            _manager.startNewExperiment("1 " + (exp1Checkbox.Checked ? "KB" : "VR"), exp1Checkbox.Checked);
         }
 
         private void exp2Button_Click(object sender, EventArgs e)
         {
-            _manager.startNewExperiment(2);
+            _manager.startNewExperiment("2 " + (exp2Checkbox.Checked ? "KB" : "VR"), exp2Checkbox.Checked);
         }
 
         private void exp3Button_Click(object sender, EventArgs e)
         {
-            _manager.startNewExperiment(3);
+            _manager.startNewExperiment("3 " + (exp3Checkbox.Checked ? "KB" : "VR"), exp3Checkbox.Checked);
         }
 
         private void newParticipantButton_Click(object sender, EventArgs e)
@@ -141,5 +141,11 @@ namespace MindWaveExperimentRecorder
         {
             this._manager.setOutputDirectory(this.outputDirTextBox.Text);
         }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            _manager.startNewExperiment("Baseline", false);
+        }
+
     }
 }

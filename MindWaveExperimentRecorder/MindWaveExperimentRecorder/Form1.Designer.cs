@@ -28,11 +28,11 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.Series series3 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea3 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend3 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series7 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Series series8 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Series series9 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.eegChart = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.experimentLabel = new System.Windows.Forms.Label();
             this.participantLabel = new System.Windows.Forms.Label();
@@ -47,33 +47,37 @@
             this.experienceComboBox = new System.Windows.Forms.ComboBox();
             this.saveButton = new System.Windows.Forms.Button();
             this.outputDirTextBox = new System.Windows.Forms.TextBox();
+            this.baselineButton = new System.Windows.Forms.Button();
+            this.exp1Checkbox = new System.Windows.Forms.CheckBox();
+            this.exp2Checkbox = new System.Windows.Forms.CheckBox();
+            this.exp3Checkbox = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.eegChart)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.fileSystemWatcher1)).BeginInit();
             this.SuspendLayout();
             // 
             // eegChart
             // 
-            chartArea1.Name = "ChartArea1";
-            this.eegChart.ChartAreas.Add(chartArea1);
-            legend1.Name = "Legend1";
-            this.eegChart.Legends.Add(legend1);
+            chartArea3.Name = "ChartArea1";
+            this.eegChart.ChartAreas.Add(chartArea3);
+            legend3.Name = "Legend1";
+            this.eegChart.Legends.Add(legend3);
             this.eegChart.Location = new System.Drawing.Point(12, 137);
             this.eegChart.Name = "eegChart";
-            series1.ChartArea = "ChartArea1";
-            series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series1.Legend = "Legend1";
-            series1.Name = "Attention";
-            series2.ChartArea = "ChartArea1";
-            series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series2.Legend = "Legend1";
-            series2.Name = "Meditation";
-            series3.ChartArea = "ChartArea1";
-            series3.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.StepLine;
-            series3.Legend = "Legend1";
-            series3.Name = "BlinkStrength";
-            this.eegChart.Series.Add(series1);
-            this.eegChart.Series.Add(series2);
-            this.eegChart.Series.Add(series3);
+            series7.ChartArea = "ChartArea1";
+            series7.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series7.Legend = "Legend1";
+            series7.Name = "Attention";
+            series8.ChartArea = "ChartArea1";
+            series8.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series8.Legend = "Legend1";
+            series8.Name = "Meditation";
+            series9.ChartArea = "ChartArea1";
+            series9.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.StepLine;
+            series9.Legend = "Legend1";
+            series9.Name = "BlinkStrength";
+            this.eegChart.Series.Add(series7);
+            this.eegChart.Series.Add(series8);
+            this.eegChart.Series.Add(series9);
             this.eegChart.Size = new System.Drawing.Size(1083, 328);
             this.eegChart.TabIndex = 0;
             this.eegChart.Text = "chart1";
@@ -160,11 +164,11 @@
             // 
             // logTextBox
             // 
-            this.logTextBox.Location = new System.Drawing.Point(248, 8);
+            this.logTextBox.Location = new System.Drawing.Point(139, 8);
             this.logTextBox.Multiline = true;
             this.logTextBox.Name = "logTextBox";
             this.logTextBox.ReadOnly = true;
-            this.logTextBox.Size = new System.Drawing.Size(505, 105);
+            this.logTextBox.Size = new System.Drawing.Size(408, 105);
             this.logTextBox.TabIndex = 9;
             // 
             // experienceComboBox
@@ -193,11 +197,55 @@
             this.outputDirTextBox.TabIndex = 12;
             this.outputDirTextBox.TextChanged += new System.EventHandler(this.outputDirTextBox_TextChanged);
             // 
+            // baselineButton
+            // 
+            this.baselineButton.Location = new System.Drawing.Point(673, 8);
+            this.baselineButton.Name = "baselineButton";
+            this.baselineButton.Size = new System.Drawing.Size(102, 23);
+            this.baselineButton.TabIndex = 13;
+            this.baselineButton.Text = "Baseline";
+            this.baselineButton.UseVisualStyleBackColor = true;
+            this.baselineButton.Click += new System.EventHandler(this.button1_Click);
+            // 
+            // exp1Checkbox
+            // 
+            this.exp1Checkbox.AutoSize = true;
+            this.exp1Checkbox.Location = new System.Drawing.Point(683, 40);
+            this.exp1Checkbox.Name = "exp1Checkbox";
+            this.exp1Checkbox.Size = new System.Drawing.Size(71, 17);
+            this.exp1Checkbox.TabIndex = 14;
+            this.exp1Checkbox.Text = "Exp 1 VR";
+            this.exp1Checkbox.UseVisualStyleBackColor = true;
+            // 
+            // exp2Checkbox
+            // 
+            this.exp2Checkbox.AutoSize = true;
+            this.exp2Checkbox.Location = new System.Drawing.Point(683, 69);
+            this.exp2Checkbox.Name = "exp2Checkbox";
+            this.exp2Checkbox.Size = new System.Drawing.Size(71, 17);
+            this.exp2Checkbox.TabIndex = 15;
+            this.exp2Checkbox.Text = "Exp 2 VR";
+            this.exp2Checkbox.UseVisualStyleBackColor = true;
+            // 
+            // exp3Checkbox
+            // 
+            this.exp3Checkbox.AutoSize = true;
+            this.exp3Checkbox.Location = new System.Drawing.Point(683, 99);
+            this.exp3Checkbox.Name = "exp3Checkbox";
+            this.exp3Checkbox.Size = new System.Drawing.Size(71, 17);
+            this.exp3Checkbox.TabIndex = 16;
+            this.exp3Checkbox.Text = "Exp 3 VR";
+            this.exp3Checkbox.UseVisualStyleBackColor = true;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1107, 477);
+            this.Controls.Add(this.exp3Checkbox);
+            this.Controls.Add(this.exp2Checkbox);
+            this.Controls.Add(this.exp1Checkbox);
+            this.Controls.Add(this.baselineButton);
             this.Controls.Add(this.outputDirTextBox);
             this.Controls.Add(this.saveButton);
             this.Controls.Add(this.experienceComboBox);
@@ -237,6 +285,10 @@
         private System.Windows.Forms.ComboBox experienceComboBox;
         private System.Windows.Forms.Button saveButton;
         private System.Windows.Forms.TextBox outputDirTextBox;
+        private System.Windows.Forms.Button baselineButton;
+        private System.Windows.Forms.CheckBox exp3Checkbox;
+        private System.Windows.Forms.CheckBox exp2Checkbox;
+        private System.Windows.Forms.CheckBox exp1Checkbox;
     }
 }
 

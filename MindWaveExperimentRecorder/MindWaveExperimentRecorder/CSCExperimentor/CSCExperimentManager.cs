@@ -16,14 +16,22 @@ namespace MindWaveExperimentRecorder.CSCExperimentor
         List<TypedDataPoint<double>> _meditationReadings;
         List<TypedDataPoint<double>> _blinkRecordings;
 
-        int _id;
+        string _id;
 
-        public MindwaveExperiment(int id)
+        bool _isVR;
+
+        public MindwaveExperiment(string id, bool isVR)
         {
             _id = id;
+            _isVR = isVR;
             _attentionReadings = new List<TypedDataPoint<double>>();
             _meditationReadings = new List<TypedDataPoint<double>>();
             _blinkRecordings = new List<TypedDataPoint<double>>();
+        }
+
+        public string getID()
+        {
+            return _id;
         }
 
         /// <summary>
@@ -56,8 +64,12 @@ namespace MindWaveExperimentRecorder.CSCExperimentor
             ws.Name = "Exp " + _id;
             ws.Cells[1, 1] = "Experiment " + _id;
 
-            //find the lowest date time
+            //find the lowest date time of all the results to create a point of origin
             DateTime lowestTime = getLowestDateTime();
+            ws.Cells[1, 2] = lowestTime.ToString();
+            ws.Cells[1, 3] = getHighestDateTime().ToString();
+
+            ws.Cells[1, 4] = _isVR.ToString();
 
             addDataListToWorksheet(_attentionReadings, "Attention", 2, 1, ws, lowestTime);
             addDataListToWorksheet(_meditationReadings, "Meditation", 2, 4, ws, lowestTime);
@@ -84,6 +96,25 @@ namespace MindWaveExperimentRecorder.CSCExperimentor
         }
 
         /// <summary>
+        /// Finds the highest datetime amoungst all of the starting records
+        /// </summary>
+        /// <returns>The highest date time across the records</returns>
+        DateTime getHighestDateTime()
+        {
+            DateTime runningHighest = default(DateTime);
+            if (_attentionReadings.Count > 0)
+                runningHighest = _attentionReadings[_attentionReadings.Count - 1].TimeStamp;
+
+            if (_meditationReadings.Count > 0 && (default(DateTime) == runningHighest || _meditationReadings[_meditationReadings.Count - 1].TimeStamp > runningHighest))
+                runningHighest = _meditationReadings[_meditationReadings.Count - 1].TimeStamp;
+
+            if (_blinkRecordings.Count > 0 && (default(DateTime) == runningHighest || _blinkRecordings[_blinkRecordings.Count - 1].TimeStamp > runningHighest))
+                runningHighest = _blinkRecordings[_blinkRecordings.Count - 1].TimeStamp;
+
+            return runningHighest;
+        }
+
+        /// <summary>
         /// Adds the data list to the parameter worksheet, listing the values in columns
         /// Format is Title /n TimeFromStartOfExperiment /t Value
         /// </summary>
@@ -96,6 +127,7 @@ namespace MindWaveExperimentRecorder.CSCExperimentor
         protected void addDataListToWorksheet(List<TypedDataPoint<double>> input, string title, int startRow, int startColumn, Worksheet ws, DateTime startTime)
         {
             ws.Cells[startRow, startColumn] = title;
+            ws.Cells[startRow, startColumn + 1] = input.Count;
             ws.Cells[startRow + 1, startColumn] = "Time Stamp";
             ws.Cells[startRow + 1, startColumn + 1] = "Value";
 
@@ -120,7 +152,7 @@ namespace MindWaveExperimentRecorder.CSCExperimentor
         //flag for whether eeg sensor data should be recorded
         bool _shouldRecordData = false;
         Connector _eegSensor;
-        string _outputDir = @"C:\CSC4001Results";
+        string _outputDir = @"J:\Users\Peter\SkyDrive\Documents\CSC 4001\ExperimentResults\Users";
 
         IExperimentorView _view;
 
@@ -249,9 +281,14 @@ namespace MindWaveExperimentRecorder.CSCExperimentor
             _view.updateParticipantLabel(_curParticipant);
         }
 
-        public void startNewExperiment(int id)
+        public void startNewExperiment(string id, bool isVR)
         {
-            MindwaveExperiment newExp = new MindwaveExperiment(id);
+            MindwaveExperiment prevExp =_experiments.Find(x => x.getID() == id);
+
+            if (prevExp != null)
+                id += "Newer";
+
+            MindwaveExperiment newExp = new MindwaveExperiment(id, isVR);
             _activeExperiment = newExp;
             _experiments.Add(_activeExperiment);
 

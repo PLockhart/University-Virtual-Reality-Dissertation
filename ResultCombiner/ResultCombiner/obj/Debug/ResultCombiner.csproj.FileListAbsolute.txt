@@ -1,0 +1,7 @@
+J:\GitHub\CSC4001\ResultCombiner\ResultCombiner\bin\Debug\ResultCombiner.exe.config
+J:\GitHub\CSC4001\ResultCombiner\ResultCombiner\obj\Debug\ResultCombiner.csproj.ResolveComReference.cache
+J:\GitHub\CSC4001\ResultCombiner\ResultCombiner\bin\Debug\ResultCombiner.exe
+J:\GitHub\CSC4001\ResultCombiner\ResultCombiner\bin\Debug\ResultCombiner.pdb
+J:\GitHub\CSC4001\ResultCombiner\ResultCombiner\obj\Debug\ResultCombiner.csprojResolveAssemblyReference.cache
+J:\GitHub\CSC4001\ResultCombiner\ResultCombiner\obj\Debug\ResultCombiner.exe
+J:\GitHub\CSC4001\ResultCombiner\ResultCombiner\obj\Debug\ResultCombiner.pdb
