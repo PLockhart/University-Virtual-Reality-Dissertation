@@ -28,11 +28,11 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea3 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend3 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series7 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.Series series8 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.Series series9 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Series series3 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.eegChart = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.experimentLabel = new System.Windows.Forms.Label();
             this.participantLabel = new System.Windows.Forms.Label();
@@ -51,33 +51,34 @@
             this.exp1Checkbox = new System.Windows.Forms.CheckBox();
             this.exp2Checkbox = new System.Windows.Forms.CheckBox();
             this.exp3Checkbox = new System.Windows.Forms.CheckBox();
+            this.sanityButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.eegChart)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.fileSystemWatcher1)).BeginInit();
             this.SuspendLayout();
             // 
             // eegChart
             // 
-            chartArea3.Name = "ChartArea1";
-            this.eegChart.ChartAreas.Add(chartArea3);
-            legend3.Name = "Legend1";
-            this.eegChart.Legends.Add(legend3);
+            chartArea1.Name = "ChartArea1";
+            this.eegChart.ChartAreas.Add(chartArea1);
+            legend1.Name = "Legend1";
+            this.eegChart.Legends.Add(legend1);
             this.eegChart.Location = new System.Drawing.Point(12, 137);
             this.eegChart.Name = "eegChart";
-            series7.ChartArea = "ChartArea1";
-            series7.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series7.Legend = "Legend1";
-            series7.Name = "Attention";
-            series8.ChartArea = "ChartArea1";
-            series8.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series8.Legend = "Legend1";
-            series8.Name = "Meditation";
-            series9.ChartArea = "ChartArea1";
-            series9.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.StepLine;
-            series9.Legend = "Legend1";
-            series9.Name = "BlinkStrength";
-            this.eegChart.Series.Add(series7);
-            this.eegChart.Series.Add(series8);
-            this.eegChart.Series.Add(series9);
+            series1.ChartArea = "ChartArea1";
+            series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series1.Legend = "Legend1";
+            series1.Name = "Attention";
+            series2.ChartArea = "ChartArea1";
+            series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series2.Legend = "Legend1";
+            series2.Name = "Meditation";
+            series3.ChartArea = "ChartArea1";
+            series3.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.StepLine;
+            series3.Legend = "Legend1";
+            series3.Name = "BlinkStrength";
+            this.eegChart.Series.Add(series1);
+            this.eegChart.Series.Add(series2);
+            this.eegChart.Series.Add(series3);
             this.eegChart.Size = new System.Drawing.Size(1083, 328);
             this.eegChart.TabIndex = 0;
             this.eegChart.Text = "chart1";
@@ -237,11 +238,22 @@
             this.exp3Checkbox.Text = "Exp 3 VR";
             this.exp3Checkbox.UseVisualStyleBackColor = true;
             // 
+            // sanityButton
+            // 
+            this.sanityButton.Location = new System.Drawing.Point(576, 8);
+            this.sanityButton.Name = "sanityButton";
+            this.sanityButton.Size = new System.Drawing.Size(75, 23);
+            this.sanityButton.TabIndex = 17;
+            this.sanityButton.Text = "Sanity";
+            this.sanityButton.UseVisualStyleBackColor = true;
+            this.sanityButton.Click += new System.EventHandler(this.sanityButton_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1107, 477);
+            this.Controls.Add(this.sanityButton);
             this.Controls.Add(this.exp3Checkbox);
             this.Controls.Add(this.exp2Checkbox);
             this.Controls.Add(this.exp1Checkbox);
@@ -289,6 +301,7 @@
         private System.Windows.Forms.CheckBox exp3Checkbox;
         private System.Windows.Forms.CheckBox exp2Checkbox;
         private System.Windows.Forms.CheckBox exp1Checkbox;
+        private System.Windows.Forms.Button sanityButton;
     }
 }
 

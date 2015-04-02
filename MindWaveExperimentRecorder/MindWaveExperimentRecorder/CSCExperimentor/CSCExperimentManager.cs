@@ -137,6 +137,15 @@ namespace MindWaveExperimentRecorder.CSCExperimentor
                 ws.Cells[startRow + 2 + i, startColumn + 1] = input[i].Value;
             }
         }
+
+        /// <summary>
+        /// Whether this experiment has any data in it or not
+        /// </summary>
+        /// <returns>True if no data has been recorded for it</returns>
+        public bool isEmpty()
+        {
+            return _attentionReadings.Count == 0 && _meditationReadings.Count == 0 && _blinkRecordings.Count == 0;
+        }
     }
 
     class CSCExperimentManager : IExperimentManager
@@ -283,6 +292,13 @@ namespace MindWaveExperimentRecorder.CSCExperimentor
 
         public void startNewExperiment(string id, bool isVR)
         {
+            //check to see if we are overriding a current experiment
+            //remove it, if it is empty
+            if (_activeExperiment != null && _activeExperiment.isEmpty() == true)
+            {
+                _experiments.Remove(_activeExperiment);
+            }
+
             MindwaveExperiment prevExp =_experiments.Find(x => x.getID() == id);
 
             if (prevExp != null)

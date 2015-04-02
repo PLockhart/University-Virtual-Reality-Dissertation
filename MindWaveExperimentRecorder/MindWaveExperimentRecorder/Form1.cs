@@ -147,5 +147,10 @@ namespace MindWaveExperimentRecorder
             _manager.startNewExperiment("Baseline", false);
         }
 
+        private void sanityButton_Click(object sender, EventArgs e)
+        {
+            _manager.startNewExperiment("Sanity", false);
+        }
+
     }
 }
