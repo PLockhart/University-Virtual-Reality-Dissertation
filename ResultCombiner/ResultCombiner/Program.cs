@@ -135,7 +135,7 @@ namespace ResultCombiner
         private DateTime getDateTimeFromCellCoord(int row, int column, Worksheet ws)
         {
             string cellTimeStr = ws.Cells[row, column].Value.ToString();
-            return DateTime.Parse(cellTimeStr);
+            return DateTime.ParseExact(cellTimeStr, "MM/dd/yyyy HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
         }
 
         private void processBaseline(Worksheet ws)
@@ -192,7 +192,7 @@ namespace ResultCombiner
 
             DateTime eegStartTime = getDateTimeFromCellCoord(1, 2, ws);
             DateTime eegEndTime = getDateTimeFromCellCoord(1, 3, ws);
-            DateTime closestDate = DateTime.MaxValue;
+            DateTime closestDate = DateTime.MinValue;
             string closestFile = "";
             string filePrefix = "";
 
@@ -266,7 +266,7 @@ namespace ResultCombiner
 
             DateTime eegStartTime = getDateTimeFromCellCoord(1, 2, ws);
             DateTime eegEndTime = getDateTimeFromCellCoord(1, 3, ws);
-            DateTime closestDate = DateTime.MaxValue;
+            DateTime closestDate = DateTime.MinValue;
             string closestFile = "";
             string filePrefix = "";
 
@@ -325,7 +325,10 @@ namespace ResultCombiner
         {
             DateTime fileTime = getDateTimeFromUnrealDateString(timeStr);
 
-            if (Math.Abs(fileTime.Ticks - eegStartTime.Ticks) < Math.Abs(closestDate.Ticks - eegStartTime.Ticks))
+            //long ticks1 = Math.Abs(eegStartTime.Ticks - fileTime.Ticks);
+            //long min = Math.Abs(eegStartTime.Ticks - closestDate.Ticks);
+
+            if (Math.Abs((eegStartTime - fileTime).Ticks) < Math.Abs((eegStartTime - closestDate).Ticks))
             {
                 closestDate = fileTime;
                 closestFile = loopedFile;

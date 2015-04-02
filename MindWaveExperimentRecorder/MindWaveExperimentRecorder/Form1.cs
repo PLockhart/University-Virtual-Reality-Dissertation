@@ -90,17 +90,17 @@ namespace MindWaveExperimentRecorder
 
         private void exp1Button_Click(object sender, EventArgs e)
         {
-            _manager.startNewExperiment("1 " + (exp1Checkbox.Checked ? "KB" : "VR"), exp1Checkbox.Checked);
+            _manager.startNewExperiment("1 " + (exp1Checkbox.Checked ? "VR" : "KB"), exp1Checkbox.Checked);
         }
 
         private void exp2Button_Click(object sender, EventArgs e)
         {
-            _manager.startNewExperiment("2 " + (exp2Checkbox.Checked ? "KB" : "VR"), exp2Checkbox.Checked);
+            _manager.startNewExperiment("2 " + (exp2Checkbox.Checked ? "VR" : "KB"), exp2Checkbox.Checked);
         }
 
         private void exp3Button_Click(object sender, EventArgs e)
         {
-            _manager.startNewExperiment("3 " + (exp3Checkbox.Checked ? "KB" : "VR"), exp3Checkbox.Checked);
+            _manager.startNewExperiment("3 " + (exp3Checkbox.Checked ? "VR" : "KB"), exp3Checkbox.Checked);
         }
 
         private void newParticipantButton_Click(object sender, EventArgs e)
