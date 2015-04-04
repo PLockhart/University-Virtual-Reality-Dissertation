@@ -302,7 +302,7 @@ namespace MindWaveExperimentRecorder.CSCExperimentor
             MindwaveExperiment prevExp =_experiments.Find(x => x.getID() == id);
 
             if (prevExp != null)
-                id += "Newer";
+                id = prevExp.getID() + "Newer";
 
             MindwaveExperiment newExp = new MindwaveExperiment(id, isVR);
             _activeExperiment = newExp;
