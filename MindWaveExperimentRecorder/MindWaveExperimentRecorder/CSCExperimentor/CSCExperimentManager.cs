@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
 
 using Microsoft.Office.Interop.Excel;
 using NeuroSky.ThinkGear;
@@ -131,11 +132,22 @@ namespace MindWaveExperimentRecorder.CSCExperimentor
             ws.Cells[startRow + 1, startColumn] = "Time Stamp";
             ws.Cells[startRow + 1, startColumn + 1] = "Value";
 
+            double totalValue = 0;
+            int totalValidValues = 0;
+
             for (int i = 0; i < input.Count; i++)
             {
                 ws.Cells[startRow + 2 + i, startColumn] = (input[i].TimeStamp - startTime).TotalSeconds;
                 ws.Cells[startRow + 2 + i, startColumn + 1] = input[i].Value;
+
+                if (input[i].Value != 0)
+                {
+                    totalValidValues++;
+                    totalValue += input[i].Value;
+                }
             }
+
+            ws.Cells[startRow, startColumn + 2] = totalValue / totalValidValues;
         }
 
         /// <summary>
@@ -352,12 +364,26 @@ namespace MindWaveExperimentRecorder.CSCExperimentor
                 mainSheet.Cells[1, 1] = _curParticipant.Name;
                 mainSheet.Cells[1, 2] = Enum.GetName(typeof(Participant.ExperienceLevels), _curParticipant.ExperienceLevel);
 
+                mainSheet.Cells[3, 3] = "Rate which relaxation experience you found the best on a scale of 1 to 5, where 1 means you preferred the non-virtual reality experience, 5 means you preferred the VR experience, and 3 means you found them the same.";
+                mainSheet.Cells[4, 3] = "Rate which firework experience you found the best on a scale of 1 to 5, where 1 means you preferred the non-virtual reality experience, 5 means you preferred the VR experience, and 3 means you found them the same.";
+                mainSheet.Cells[5, 3] = "Rate which tag experience you found the best on a scale of 1 to 5, where 1 means you preferred the non-virtual reality experience, 5 means you preferred the VR experience, and 3 means you found them the same";
+                mainSheet.Cells[6, 3] = "Do you think having the virtual headset on helped you relax better, or do you think it was distracting?";
+                mainSheet.Cells[7, 3] = "On a scale of 1 to 5, rate how well you think the virtual world mimicked your movements (1 is very poor, 5 is very good, 3 is ok)";
+                mainSheet.Cells[8, 3] = "On a scale of 1 to 5, how experienced are you in playing first person shooters on the PC (1 being you never play them, 5 being you regularly play them)";
+                mainSheet.Cells[9, 3] = "On a scale of 1 to 5, how experienced are you with the Oculus Rift or any other virtual reality headset (1 being you have never used it, 5 being you use one regularly)";
+                mainSheet.Cells[10, 3] = "On a scale of 1 to 5, rate which control scheme you found easiest to use (1 being you much preferred the keyboard and mouse, 5 being you much preferred using the motion detection, or 3 being you found them equally as easy)";
+                mainSheet.Cells[11, 3] = "On a scale of 1 to 5, rate how fit you are aerobically (1 where you feel you are slow and have restricted movement, 5 where you feel you are physically healthy and can move quickly and with ease)";
+
+
                 //future sheets are about each experiment
                 foreach (MindwaveExperiment loopedExperiment in _experiments)
                 {
                     Worksheet loopedSheet = workBook.Worksheets.Add();
                     loopedExperiment.populateWorksheet(loopedSheet);
                 }
+
+                if (File.Exists(filePath + ".xlsx") == true)
+                    filePath += "newer";
 
                 workBook.SaveAs(filePath + ".xlsx");
                 workBook.Close();

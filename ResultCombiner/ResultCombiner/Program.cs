@@ -7,8 +7,73 @@ using System.IO;
 
 using Microsoft.Office.Interop.Excel;
 
+//TODO: create graph of average of all results from all experiments
+//compare average increase/decreate between experiment and baseline
+//then compare average increase/decreate between VR and non-VR
+
 namespace ResultCombiner
 {
+    struct ExpResultStore
+    {
+        /// <summary>
+        /// values for the average attention from each participant in this expeirment (non-VR)
+        /// </summary>
+        public List<int> nonVRAttention;
+        /// <summary>
+        /// values for the average attention from each participant in this expeirment (VR)
+        /// </summary>
+        public List<int> vrAttention;
+
+        /// <summary>
+        /// values for the average meditation from each participant in this expeirment (non-VR)
+        /// </summary>
+        public List<int> nonVRMeditation;
+        /// <summary>
+        /// values for the average meditation from each participant in this expeirment (VR)
+        /// </summary>
+        public List<int> vrMeditation;
+
+        /// <summary>
+        /// values for the difference between each participants average values for attention in the VR and non-VR version of the experiment
+        /// </summary>
+        public List<int> deltaVRnonVRAttention;
+        /// <summary>
+        /// values for the difference between each participants average values for attention in the VR compared to the average value for their baseline
+        /// </summary>
+        public List<int> deltaVRandBaselineAttention;
+        /// <summary>
+        /// values for the difference between each participants average values for attention in the non-VR compared to the average value for their baseline
+        /// </summary>
+        public List<int> deltaNonVRandBaselineAttention;
+
+        /// <summary>
+        /// values for the difference between each participants average values for meditation in the VR and non-VR version of the experiment
+        /// </summary>
+        public List<int> deltaVRnonVRMeditation;
+        /// <summary>
+        /// values for the difference between each participants average values for meditation in the VR compared to the average value for their baseline
+        /// </summary>
+        public List<int> deltaVRandBaselineMeditation;
+        /// <summary>
+        /// values for the difference between each participants average values for meditation in the non-VR compared to the average value for their baseline
+        /// </summary>
+        public List<int> deltaNonVRandBaselineMeditation;
+
+        public ExpResultStore()
+        {
+            nonVRAttention = new List<int>();
+            vrAttention = new List<int>();
+            nonVRMeditation = new List<int>();
+            vrMeditation = new List<int>();
+            deltaVRnonVRAttention = new List<int>();
+            deltaVRandBaselineAttention = new List<int>();
+            deltaNonVRandBaselineAttention = new List<int>();
+            deltaVRnonVRMeditation = new List<int>();
+            deltaVRandBaselineMeditation = new List<int>();
+            deltaNonVRandBaselineMeditation = new List<int>();
+        }
+    }
+
     class Program
     {
         const string RESULTS_FOLDER = "CombinedResults";
@@ -17,6 +82,21 @@ namespace ResultCombiner
         const string TAG_FOLDER = "Tag";
 
         Application _xlApp;
+
+        #region Changed on a per-particpant basis
+
+        int _baselineAttention;
+        int _baselineMeditation;
+
+        #endregion
+
+        #region Rolling results
+
+        ExpResultStore _exp1Store;
+        ExpResultStore _exp2Store;
+        ExpResultStore _exp3Store;
+
+        #endregion
 
         static void Main(string[] args)
         {
@@ -36,7 +116,6 @@ namespace ResultCombiner
             //each excel file has a deconstructor file associated with it for some reason
             for (int i = 0; i < participantFiles.Length; i += 2)
             {
-                
                 string resultsFilepath = RESULTS_FOLDER + "\\" + Path.GetFileName(participantFiles[i]);
 
                 if (File.Exists(resultsFilepath) == true)
@@ -46,43 +125,36 @@ namespace ResultCombiner
 
                 Workbook participantWb = _xlApp.Workbooks.Open(Path.GetFullPath(resultsFilepath), Type.Missing, false);
 
+                _baselineAttention = 0;
+                _baselineMeditation = 0;
+
+                //do a 1st pass to find the baseline experiment to get averages
+                foreach (Worksheet loopedWorksheet in participantWb.Worksheets)
+                {
+                    if (loopedWorksheet.Name == "Participant")
+                    {
+                        processBaseline(loopedWorksheet);
+                    }
+                }
+
                 try
                 {
-
-                    Worksheet exp1;
-                    Worksheet exp2;
-                    Worksheet exp3;
-                    Worksheet exp4;
-
                     foreach (Worksheet loopedWorksheet in participantWb.Worksheets)
                     {
+                        //the 4th character in the name dictates the experiment type
                         switch (loopedWorksheet.Name[4])
                         {
                             case '1':
                                 generateChartForMeditationAndAttention(loopedWorksheet);
-                                exp1 = loopedWorksheet;
                                 break;
                             case '2': 
                                 processFireworkExperiment(loopedWorksheet);
-                                exp2 = loopedWorksheet;
                                 break;
                             case '3':
                                 processTagExperiment(loopedWorksheet);
-                                exp3 = loopedWorksheet;
                                 break;
-                            case '4':
-                                processBaseline(loopedWorksheet);
-                                exp4 = loopedWorksheet;
-                                break;
-                                
                         }
                     }
-                    /*
-                    //now add baselines now that all the sheets have been processed
-                    ChartObjects xlCharts = exp1.ChartObjects(Type.Missing);
-                    ChartObject chartObject = xlCharts.Item(0);
-                    Chart chart = chartObject.Chart;
-                    */
                 }
                 catch (Exception e)
                 {
@@ -142,45 +214,12 @@ namespace ResultCombiner
         {
             //average all the attention values
             int numAttentionValues = (int)ws.Cells[2, 2].Value;
-            double runningTotal = 0;
-
-            for (int i = 0; i < numAttentionValues; i++)
-            {
-                runningTotal += (int)ws.Cells[4 + i, 2].Value;
-            }
-
-            int averageAttention = (int)Math.Round(runningTotal / numAttentionValues);
-            writeDataDownColumn(ws, Enumerable.Repeat<int>(averageAttention, numAttentionValues).ToArray(), 4, 3);
-
+            _baselineAttention = (int)ws.Cells[2, 3].Value;
             int numMeditationValues = (int)ws.Cells[2, 5].Value;
-            runningTotal = 0;
+            _baselineMeditation = (int)ws.Cells[2, 6].Value;
 
-            for (int i = 0; i < numMeditationValues; i++)
-            {
-                runningTotal += (int)ws.Cells[4 + i, 5].Value;
-            }
-
-            int averageMeditation = (int)Math.Round(runningTotal / numMeditationValues);
-            writeDataDownColumn(ws, Enumerable.Repeat<int>(averageMeditation, numMeditationValues).ToArray(), 4, 6);
-
+            
             Chart generatedChart = generateChartForMeditationAndAttention(ws);
-
-            SeriesCollection sc = generatedChart.SeriesCollection();
-            Series series3 = sc.NewSeries();
-            string endCell = (4 + numAttentionValues).ToString();
-
-            series3.Values = ws.get_Range("C4", "C" + endCell);
-            series3.XValues = ws.get_Range("A4", "A" + endCell);
-            series3.Name = "Average Attention";
-            series3.ChartType = XlChartType.xlLine;
-
-            Series series4 = sc.NewSeries();
-            endCell = (4 + numMeditationValues).ToString();
-
-            series4.Values = ws.get_Range("F4", "F" + endCell);
-            series4.XValues = ws.get_Range("D4", "D" + endCell);
-            series4.Name = "Average Meditation";
-            series4.ChartType = XlChartType.xlLine;
         }
 
         private void processTagExperiment(Worksheet ws)
@@ -201,7 +240,7 @@ namespace ResultCombiner
                 string loopedFile = tagFiles[i];
 
                 string timeStr = Path.GetFileNameWithoutExtension(loopedFile);
-                setLowestTimeVars(eegStartTime, ref closestDate, ref closestFile, ref filePrefix, loopedFile, timeStr);
+                setLowestTimeFileAndDate(eegStartTime, ref closestDate, ref closestFile, ref filePrefix, loopedFile, timeStr);
             }
 
             //read the tags file
@@ -228,7 +267,10 @@ namespace ResultCombiner
             series3.ErrorBar(XlErrorBarDirection.xlY, XlErrorBarInclude.xlErrorBarIncludeBoth, XlErrorBarType.xlErrorBarTypePercent, 100);
         }
 
-        private static Chart generateChartForMeditationAndAttention(Worksheet ws)
+        /// <summary>
+        /// Generates a chart for the medtitation and attention values in this worksheet, along with the baseline series 
+        /// </summary>
+        private Chart generateChartForMeditationAndAttention(Worksheet ws)
         {
             //create a graph from the data range
             ChartObjects xlCharts = ws.ChartObjects(Type.Missing);
@@ -237,24 +279,77 @@ namespace ResultCombiner
             chartPage.ChartType = XlChartType.xlLine;
 
             SeriesCollection sc = chartPage.SeriesCollection();
-            Series series1 = sc.NewSeries();
-            Series series2 = sc.NewSeries();
 
-            int numValues = (int)ws.Cells[2, 2].Value;
-            string endCell = (4 + numValues).ToString();
-
-            series1.Values = ws.get_Range("B4", "B" + endCell);
-            series1.XValues = ws.get_Range("A4", "A" + endCell);
-            series1.Name = "Attention";
-
-            numValues = (int)ws.Cells[2, 5].Value;
-            endCell = (4 + numValues).ToString();
-
-            series2.Values = ws.get_Range("E4", "E" + endCell);
-            series2.XValues = ws.get_Range("D4", "D" + endCell);
-            series2.Name = "Meditation";
+            createSeriesForColumnDataWithAverage(ws, sc, 2, 1, "Attention", _baselineAttention);
+            createSeriesForColumnDataWithAverage(ws, sc, 2, 4, "Meditation", _baselineMeditation);
 
             return chartPage;
+        }
+
+        /// <summary>
+        /// Converts an index to Excel column string
+        /// </summary>
+        public static string getColNameFromIndex(int columnNumber)
+        {
+            int dividend = columnNumber;
+            string columnName = String.Empty;
+            int modulo;
+
+            while (dividend > 0)
+            {
+                modulo = (dividend - 1) % 26;
+                columnName = Convert.ToChar(65 + modulo).ToString() + columnName;
+                dividend = (int)((dividend - modulo) / 26);
+            }
+
+            return columnName;
+        }
+
+        /// <summary>
+        /// Creates a series from a column of values with the following excel coordinate format:
+        /// (0, 1) is a number of the total values
+        /// (2, 0) is where the timestamps start
+        /// (2, 1) is where the values start
+        /// (x, 3) is a blank column beside the values that is free space for writing
+        /// </summary>
+        /// <param name="ws">The worksheet we will be getting the values from</param>
+        /// <param name="sc">The graph series collection we will be adding to</param>
+        /// <param name="templateStartRow">The origin row of the data format</param>
+        /// <param name="templateStartColumn">The origin column of the data format</param>
+        /// <param name="seriesName">The name the raw and average series should take</param>
+        /// <param name="average">The average value to use to draw the graph</param>
+        private void createSeriesForColumnDataWithAverage(Worksheet ws, SeriesCollection sc, int templateStartRow, int templateStartColumn, string seriesName, int average)
+        {
+            Series series1 = sc.NewSeries();
+
+            int dataStartRow = templateStartRow + 2;
+
+            //the raw values
+            int numValues = (int)ws.Cells[templateStartRow, templateStartColumn + 1].Value;
+            string endCell = (dataStartRow + numValues).ToString();
+
+            string rawDataColumn = getColNameFromIndex(templateStartColumn + 1);
+            string rawDataTimeColumn = getColNameFromIndex(templateStartColumn);
+
+            //create series from the raw data
+            series1.Values = ws.get_Range(rawDataColumn + dataStartRow.ToString(), rawDataColumn + endCell);
+            series1.XValues = ws.get_Range(rawDataTimeColumn + dataStartRow.ToString(), rawDataTimeColumn + endCell);
+            series1.Name = seriesName;
+
+            //repeat the baseline data beside it
+            writeDataDownColumn(ws, Enumerable.Repeat<int>(_baselineAttention, numValues).ToArray(), dataStartRow, templateStartColumn + 2);
+
+            //create a new series for average values
+            Series baselineASeries = sc.NewSeries();
+            endCell = (dataStartRow + numValues).ToString();
+
+            string rawDataAverageColumn = getColNameFromIndex(templateStartColumn + 2);
+
+            //create a series from the repeated average value
+            series1.Values = ws.get_Range(rawDataAverageColumn + dataStartRow.ToString(), rawDataAverageColumn + endCell);
+            series1.XValues = ws.get_Range(rawDataTimeColumn + dataStartRow.ToString(), rawDataTimeColumn + endCell);
+            baselineASeries.Name = "Average " + seriesName;
+            baselineASeries.ChartType = XlChartType.xlLine;
         }
 
         private void processFireworkExperiment(Worksheet ws)
@@ -278,7 +373,7 @@ namespace ResultCombiner
                 string[] fileNameSplit = Path.GetFileNameWithoutExtension(loopedFile).Split(new char[] { ' ' });
                 string timeStr = fileNameSplit[0];
 
-                setLowestTimeVars(eegStartTime, ref closestDate, ref closestFile, ref filePrefix, loopedFile, timeStr);
+                setLowestTimeFileAndDate(eegStartTime, ref closestDate, ref closestFile, ref filePrefix, loopedFile, timeStr);
             }
             //read the explosions file
             double[] explosionStamps = getNormalisedTimeStamps(eegStartTime, eegEndTime,
@@ -321,12 +416,18 @@ namespace ResultCombiner
             series4.ErrorBar(XlErrorBarDirection.xlY, XlErrorBarInclude.xlErrorBarIncludeBoth, XlErrorBarType.xlErrorBarTypePercent, 100);
         }
 
-        private void setLowestTimeVars(DateTime eegStartTime, ref DateTime closestDate, ref string closestFile, ref string filePrefix, string loopedFile, string timeStr)
+        /// <summary>
+        /// Sets the lowest datetime out of the parameters in comparions to the startTime.
+        /// </summary>
+        /// <param name="eegStartTime">The time all dates will be compared to</param>
+        /// <param name="closestDate">The closest date so far</param>
+        /// <param name="closestFile">The file associated with the closest date</param>
+        /// <param name="filePrefix">The original unreal time string</param>
+        /// <param name="loopedFile">Canidate for the closest file</param>
+        /// <param name="timeStr">Canditate for the closest time</param>
+        private void setLowestTimeFileAndDate(DateTime eegStartTime, ref DateTime closestDate, ref string closestFile, ref string filePrefix, string loopedFile, string timeStr)
         {
             DateTime fileTime = getDateTimeFromUnrealDateString(timeStr);
-
-            //long ticks1 = Math.Abs(eegStartTime.Ticks - fileTime.Ticks);
-            //long min = Math.Abs(eegStartTime.Ticks - closestDate.Ticks);
 
             if (Math.Abs((eegStartTime - fileTime).Ticks) < Math.Abs((eegStartTime - closestDate).Ticks))
             {
@@ -336,6 +437,9 @@ namespace ResultCombiner
             }
         }
 
+        /// <summary>
+        /// Writes the array of data down the row and column, in excel coordinates
+        /// </summary>
         private static void writeDataDownColumn<T>(Worksheet ws, T[] data, int startRow, int startColumn)
         {
             for (int i = 0; i < data.Length; i++)
