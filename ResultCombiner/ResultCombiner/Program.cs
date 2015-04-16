@@ -19,67 +19,6 @@ namespace ResultCombiner
         public T vr;
     }
 
-    class ExpResultStore
-    {
-        /// <summary>
-        /// values for the average attention from each participant in this expeirment (non-VR)
-        /// </summary>
-        public List<int> nonVRAttention;
-        /// <summary>
-        /// values for the average attention from each participant in this expeirment (VR)
-        /// </summary>
-        public List<int> vrAttention;
-
-        /// <summary>
-        /// values for the average meditation from each participant in this expeirment (non-VR)
-        /// </summary>
-        public List<int> nonVRMeditation;
-        /// <summary>
-        /// values for the average meditation from each participant in this expeirment (VR)
-        /// </summary>
-        public List<int> vrMeditation;
-
-        /// <summary>
-        /// values for the difference between each participants average values for attention in the VR and non-VR version of the experiment
-        /// </summary>
-        public List<int> deltaVRnonVRAttention;
-        /// <summary>
-        /// values for the difference between each participants average values for attention in the VR compared to the average value for their baseline
-        /// </summary>
-        public List<int> deltaVRandBaselineAttention;
-        /// <summary>
-        /// values for the difference between each participants average values for attention in the non-VR compared to the average value for their baseline
-        /// </summary>
-        public List<int> deltaNonVRandBaselineAttention;
-
-        /// <summary>
-        /// values for the difference between each participants average values for meditation in the VR and non-VR version of the experiment
-        /// </summary>
-        public List<int> deltaVRnonVRMeditation;
-        /// <summary>
-        /// values for the difference between each participants average values for meditation in the VR compared to the average value for their baseline
-        /// </summary>
-        public List<int> deltaVRandBaselineMeditation;
-        /// <summary>
-        /// values for the difference between each participants average values for meditation in the non-VR compared to the average value for their baseline
-        /// </summary>
-        public List<int> deltaNonVRandBaselineMeditation;
-
-        public ExpResultStore()
-        {
-            nonVRAttention = new List<int>();
-            vrAttention = new List<int>();
-            nonVRMeditation = new List<int>();
-            vrMeditation = new List<int>();
-            deltaVRnonVRAttention = new List<int>();
-            deltaVRandBaselineAttention = new List<int>();
-            deltaNonVRandBaselineAttention = new List<int>();
-            deltaVRnonVRMeditation = new List<int>();
-            deltaVRandBaselineMeditation = new List<int>();
-            deltaNonVRandBaselineMeditation = new List<int>();
-        }
-    }
-
     class Program
     {
         const string MAIN_DIR = @"J:\Users\Peter\SkyDrive\Documents\CSC 4001\ExperimentResults\";
@@ -118,8 +57,8 @@ namespace ResultCombiner
         #region Rolling results
 
         ExpResultStore _exp1Store;
-        ExpResultStore _exp2Store;
-        ExpResultStore _exp3Store;
+        Exp2Store _exp2Store;
+        Exp3Store _exp3Store;
 
         #endregion
 
@@ -246,9 +185,9 @@ namespace ResultCombiner
             writeResultStoreTemplate(ws, x, y);
 
             //write the basic experiment store data down a column
-            writeExpStoreDownColumn(_exp1Store, x + 1, y + 1, ws);
-            writeExpStoreDownColumn(_exp2Store, x + 1, y + 2, ws);
-            writeExpStoreDownColumn(_exp3Store, x + 1, y + 3, ws);
+            _exp1Store.writeDownColumn(x + 1, y + 1, ws);
+            _exp2Store.writeDownColumn(x + 1, y + 2, ws);
+            _exp3Store.writeDownColumn(x + 1, y + 3, ws);
         }
 
         /// <summary>
@@ -261,23 +200,9 @@ namespace ResultCombiner
             writeResultStoreTemplate(ws, x, y);
 
             //write the basic experiment store data down a column
-            writeLastResultDownColumn(_exp1Store, x + 1, y + 1, ws);
-            writeLastResultDownColumn(_exp2Store, x + 1, y + 2, ws);
-            writeLastResultDownColumn(_exp3Store, x + 1, y + 3, ws);
-        }
-
-        private void writeLastResultDownColumn(ExpResultStore store, int x, int y, Worksheet ws)
-        {
-            ws.Cells[x, y] = getLast(store.nonVRAttention);
-            ws.Cells[x + 1, y] = getLast(store.vrAttention);
-            ws.Cells[x + 2, y] = getLast(store.nonVRMeditation);
-            ws.Cells[x + 3, y] = getLast(store.vrMeditation);
-            ws.Cells[x + 4, y] = getLast(store.deltaVRnonVRAttention);
-            ws.Cells[x + 5, y] = getLast(store.deltaVRandBaselineAttention);
-            ws.Cells[x + 6, y] = getLast(store.deltaNonVRandBaselineAttention);
-            ws.Cells[x + 7, y] = getLast(store.deltaVRnonVRMeditation);
-            ws.Cells[x + 8, y] = getLast(store.deltaVRandBaselineMeditation);
-            ws.Cells[x + 9, y] = getLast(store.deltaNonVRandBaselineMeditation);
+            _exp1Store.writeLastResultDownColumn(x + 1, y + 1, ws);
+            _exp2Store.writeLastResultDownColumn(x + 1, y + 2, ws);
+            _exp3Store.writeLastResultDownColumn(x + 1, y + 3, ws);
         }
 
         private static void writeResultStoreTemplate(Worksheet ws, int x, int y)
@@ -294,34 +219,17 @@ namespace ResultCombiner
             ws.Cells[x + 9, y] = "VR Meditation - Baseline Meditation";
             ws.Cells[x + 10, y] = "Non-VR Meditation - Baseline Meditation";
 
+            ws.Cells[x + 12, y] = "Non-VR Fireworks Spawned";
+            ws.Cells[x + 13, y] = "VR Fireworks Spawned";
+
+            ws.Cells[x + 14, y] = "Non-VR Tag Duration";
+            ws.Cells[x + 15, y] = "VR Tag Duration";
+
             //column labels
             ws.Cells[x, y + 1] = "Experiment 1";
             ws.Cells[x, y + 2] = "Experiment 2";
             ws.Cells[x, y + 3] = "Experiment 3";
-        }
-
-        private void writeExpStoreDownColumn(ExpResultStore store, int x, int y, Worksheet ws)
-        {
-            ws.Cells[x, y] = getAverage(store.nonVRAttention);
-            ws.Cells[x + 1, y] = getAverage(store.vrAttention);
-            ws.Cells[x + 2, y] = getAverage(store.nonVRMeditation);
-            ws.Cells[x + 3, y] = getAverage(store.vrMeditation);
-            ws.Cells[x + 4, y] = getAverage(store.deltaVRnonVRAttention);
-            ws.Cells[x + 5, y] = getAverage(store.deltaVRandBaselineAttention);
-            ws.Cells[x + 6, y] = getAverage(store.deltaNonVRandBaselineAttention);
-            ws.Cells[x + 7, y] = getAverage(store.deltaVRnonVRMeditation);
-            ws.Cells[x + 8, y] = getAverage(store.deltaVRandBaselineMeditation);
-            ws.Cells[x + 9, y] = getAverage(store.deltaNonVRandBaselineMeditation);
-        }
-
-        private int getAverage(List<int> list)
-        {
-            return list.Sum() / list.Count;
-        }
-
-        private int getLast(List<int> list)
-        {
-            return list.Count == 0 ? -1 : list[list.Count - 1];
+            
         }
 
         /// <summary>
@@ -515,7 +423,6 @@ namespace ResultCombiner
 
         #endregion
 
-
         #region Processing Experiments
 
         private void processBaseline(Worksheet ws)
@@ -585,6 +492,11 @@ namespace ResultCombiner
             series3.ErrorBar(XlErrorBarDirection.xlY, XlErrorBarInclude.xlErrorBarIncludeBoth, XlErrorBarType.xlErrorBarTypePercent, 100);
 
             recordAverageValues(ws, ref _exp3Attention, ref _exp3Meditation);
+
+            if (ws.Name.Contains("KB") == true)
+                _exp3Store.nonVRTimesTaken.Add(tagStamps[tagStamps.Length - 1]);
+            else if (ws.Name.Contains("VR") == true)
+                _exp3Store.vrTimesTaken.Add(tagStamps[tagStamps.Length - 1]);
         }
 
 
@@ -659,6 +571,11 @@ namespace ResultCombiner
             series4.ErrorBar(XlErrorBarDirection.xlY, XlErrorBarInclude.xlErrorBarIncludeBoth, XlErrorBarType.xlErrorBarTypePercent, 100);
 
             recordAverageValues(ws, ref _exp2Attention, ref _exp2Meditation);
+
+            if (ws.Name.Contains("KB") == true)
+                _exp2Store.nonVRFireworksSpawned.Add(spawnStamps.Length);
+            else if (ws.Name.Contains("VR") == true)
+                _exp2Store.vrFireworksSpawned.Add(spawnStamps.Length);
         }
 
 #endregion
@@ -795,8 +712,8 @@ namespace ResultCombiner
                 Directory.CreateDirectory(MAIN_DIR + RESULTS_FOLDER);
 
             _exp1Store = new ExpResultStore();
-            _exp2Store = new ExpResultStore();
-            _exp3Store = new ExpResultStore();
+            _exp2Store = new Exp2Store();
+            _exp3Store = new Exp3Store();
         }
 
         ~Program()
