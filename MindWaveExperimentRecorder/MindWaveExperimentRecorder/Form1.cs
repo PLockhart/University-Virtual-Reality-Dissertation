@@ -25,7 +25,7 @@ namespace MindWaveExperimentRecorder
             InitializeComponent();
             _manager = new CSCExperimentManager(this);
 
-            this.experienceComboBox.DataSource = Enum.GetValues(typeof(Participant.ExperienceLevels));
+            this.experienceComboBox.DataSource = Enum.GetValues(typeof(Participant.Genders));
             this.outputDirTextBox.Text = _manager.getOutputDir();
         }
 
@@ -107,8 +107,8 @@ namespace MindWaveExperimentRecorder
         {
             if (this.participantField.Text != "")
             {
-                Participant.ExperienceLevels xpLevel;
-                Enum.TryParse<Participant.ExperienceLevels>(this.experienceComboBox.SelectedValue.ToString(), out xpLevel);
+                Participant.Genders xpLevel;
+                Enum.TryParse<Participant.Genders>(this.experienceComboBox.SelectedValue.ToString(), out xpLevel);
 
                 _manager.setNewParticipant(this.participantField.Text, xpLevel);
                 this.participantField.Text = "";

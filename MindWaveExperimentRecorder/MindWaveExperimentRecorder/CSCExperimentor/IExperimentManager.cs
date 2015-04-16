@@ -11,14 +11,14 @@ namespace MindWaveExperimentRecorder.CSCExperimentor
     {
         public String Name;
 
-        public ExperienceLevels ExperienceLevel;
+        public Genders Gender;
 
-        public enum ExperienceLevels { None, Some, Experienced, VeryExperienced }
+        public enum Genders { None, Male, Female }
 
-        public Participant(string name, ExperienceLevels experienceLevel)
+        public Participant(string name, Genders gender)
         {
             Name = name;
-            ExperienceLevel = experienceLevel;
+            Gender = gender;
         }
     }
 
@@ -52,7 +52,7 @@ namespace MindWaveExperimentRecorder.CSCExperimentor
         /// <param name="name"></param>
         /// <param name="level">Experience level of the candidate</param>
         /// <param name="autoSaveExperiments">Should any previous experiments be saved to an auto generated file?</param>
-        void setNewParticipant(string name, Participant.ExperienceLevels level, bool autoSaveExperiments = true);
+        void setNewParticipant(string name, Participant.Genders level, bool autoSaveExperiments = true);
 
         /// <summary>
         /// Starts a new experiment. Unsaved data will be lost

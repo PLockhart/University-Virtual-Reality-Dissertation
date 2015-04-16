@@ -231,7 +231,7 @@ namespace MindWaveExperimentRecorder.CSCExperimentor
             _activeExperiment = null;
             _experiments.Clear();
             _shouldRecordData = false;
-            _curParticipant = new Participant("Unnamed", Participant.ExperienceLevels.None);
+            _curParticipant = new Participant("Unnamed", Participant.Genders.None);
 
             setRecordData(false);
 
@@ -290,7 +290,7 @@ namespace MindWaveExperimentRecorder.CSCExperimentor
 
         #region IExperimentManager methods
 
-        public void setNewParticipant(string name, Participant.ExperienceLevels level, bool autoSaveExperiments = true)
+        public void setNewParticipant(string name, Participant.Genders level, bool autoSaveExperiments = true)
         {
             if (autoSaveExperiments == true)
                 saveExperiments();
@@ -302,6 +302,16 @@ namespace MindWaveExperimentRecorder.CSCExperimentor
             _view.updateParticipantLabel(_curParticipant);
         }
 
+        private string addNewerIDRecursively(List<MindwaveExperiment> experimenets, string id)
+        {
+            MindwaveExperiment prevExp = experimenets.Find(x => x.getID() == id);
+
+            if (prevExp != null)
+                return addNewerIDRecursively(experimenets, prevExp.getID() + "Newer");
+            else
+                return id;
+        }
+
         public void startNewExperiment(string id, bool isVR)
         {
             //check to see if we are overriding a current experiment
@@ -311,10 +321,14 @@ namespace MindWaveExperimentRecorder.CSCExperimentor
                 _experiments.Remove(_activeExperiment);
             }
 
+            /*
             MindwaveExperiment prevExp =_experiments.Find(x => x.getID() == id);
 
             if (prevExp != null)
                 id = prevExp.getID() + "Newer";
+             * */
+
+            id = addNewerIDRecursively(_experiments, id);
 
             MindwaveExperiment newExp = new MindwaveExperiment(id, isVR);
             _activeExperiment = newExp;
@@ -362,14 +376,14 @@ namespace MindWaveExperimentRecorder.CSCExperimentor
                 Worksheet mainSheet = workBook.Worksheets.get_Item(1);
                 mainSheet.Name = "Participant";
                 mainSheet.Cells[1, 1] = _curParticipant.Name;
-                mainSheet.Cells[1, 2] = Enum.GetName(typeof(Participant.ExperienceLevels), _curParticipant.ExperienceLevel);
+                mainSheet.Cells[1, 2] = Enum.GetName(typeof(Participant.Genders), _curParticipant.Gender);
 
                 mainSheet.Cells[3, 3] = "Rate which relaxation experience you found the best on a scale of 1 to 5, where 1 means you preferred the non-virtual reality experience, 5 means you preferred the VR experience, and 3 means you found them the same.";
                 mainSheet.Cells[4, 3] = "Rate which firework experience you found the best on a scale of 1 to 5, where 1 means you preferred the non-virtual reality experience, 5 means you preferred the VR experience, and 3 means you found them the same.";
                 mainSheet.Cells[5, 3] = "Rate which tag experience you found the best on a scale of 1 to 5, where 1 means you preferred the non-virtual reality experience, 5 means you preferred the VR experience, and 3 means you found them the same";
                 mainSheet.Cells[6, 3] = "Do you think having the virtual headset on helped you relax better, or do you think it was distracting?";
                 mainSheet.Cells[7, 3] = "On a scale of 1 to 5, rate how well you think the virtual world mimicked your movements (1 is very poor, 5 is very good, 3 is ok)";
-                mainSheet.Cells[8, 3] = "On a scale of 1 to 5, how experienced are you in playing first person shooters on the PC (1 being you never play them, 5 being you regularly play them)";
+                mainSheet.Cells[8, 3] = "On a scale of 1 to 5, how experienced are you in playing video games involving the mouse on the PC (1 being you never play them, 5 being you regularly play them)";
                 mainSheet.Cells[9, 3] = "On a scale of 1 to 5, how experienced are you with the Oculus Rift or any other virtual reality headset (1 being you have never used it, 5 being you use one regularly)";
                 mainSheet.Cells[10, 3] = "On a scale of 1 to 5, rate which control scheme you found easiest to use (1 being you much preferred the keyboard and mouse, 5 being you much preferred using the motion detection, or 3 being you found them equally as easy)";
                 mainSheet.Cells[11, 3] = "On a scale of 1 to 5, rate how fit you are aerobically (1 where you feel you are slow and have restricted movement, 5 where you feel you are physically healthy and can move quickly and with ease)";
