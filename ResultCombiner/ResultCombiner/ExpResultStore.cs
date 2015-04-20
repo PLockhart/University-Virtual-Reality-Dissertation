@@ -67,40 +67,85 @@ namespace ResultCombiner
             deltaNonVRandBaselineMeditation = new List<int>();
         }
 
-        public virtual void writeLastResultDownColumn(int x, int y, Worksheet ws)
+        public static void writeResultStoreTemplate(Worksheet ws, int x, int y)
         {
-            ws.Cells[x, y] = getLast(nonVRAttention);
-            ws.Cells[x + 1, y] = getLast(vrAttention);
-            ws.Cells[x + 2, y] = getLast(nonVRMeditation);
-            ws.Cells[x + 3, y] = getLast(vrMeditation);
-            ws.Cells[x + 4, y] = getLast(deltaVRnonVRAttention);
-            ws.Cells[x + 5, y] = getLast(deltaVRandBaselineAttention);
-            ws.Cells[x + 6, y] = getLast(deltaNonVRandBaselineAttention);
-            ws.Cells[x + 7, y] = getLast(deltaVRnonVRMeditation);
-            ws.Cells[x + 8, y] = getLast(deltaVRandBaselineMeditation);
-            ws.Cells[x + 9, y] = getLast(deltaNonVRandBaselineMeditation);
+            //row labels
+            ws.Cells[x + 1, y] = "Non-VR Attention";
+            ws.Cells[x + 2, y] = "VR Attention";
+            ws.Cells[x + 3, y] = "Non-VR Meditation";
+            ws.Cells[x + 4, y] = "VR Meditation";
+            ws.Cells[x + 5, y] = "VR Attention - Non-Vr Attention";
+            ws.Cells[x + 6, y] = "VR Attention - Baseline Attention";
+            ws.Cells[x + 7, y] = "Non-VR Attention - Baseline Attention";
+            ws.Cells[x + 8, y] = "VR Meditation - Non-Vr Meditation";
+            ws.Cells[x + 9, y] = "VR Meditation - Baseline Meditation";
+            ws.Cells[x + 10, y] = "Non-VR Meditation - Baseline Meditation";
         }
 
-        public virtual void writeDownColumn(int x, int y, Worksheet ws)
+        public void writeLastResultDownColumn(int x, int y, Worksheet ws)
         {
-            ws.Cells[x, y] = getAverage(nonVRAttention);
-            ws.Cells[x + 1, y] = getAverage(vrAttention);
-            ws.Cells[x + 2, y] = getAverage(nonVRMeditation);
-            ws.Cells[x + 3, y] = getAverage(vrMeditation);
-            ws.Cells[x + 4, y] = getAverage(deltaVRnonVRAttention);
-            ws.Cells[x + 5, y] = getAverage(deltaVRandBaselineAttention);
-            ws.Cells[x + 6, y] = getAverage(deltaNonVRandBaselineAttention);
-            ws.Cells[x + 7, y] = getAverage(deltaVRnonVRMeditation);
-            ws.Cells[x + 8, y] = getAverage(deltaVRandBaselineMeditation);
-            ws.Cells[x + 9, y] = getAverage(deltaNonVRandBaselineMeditation);
+            if (nonVRAttention.Count != 0)
+                ws.Cells[x + 1, y] = getLast(nonVRAttention);
+            if (vrAttention.Count != 0)
+                ws.Cells[x + 2, y] = getLast(vrAttention);
+            if (nonVRMeditation.Count != 0)
+                ws.Cells[x + 3, y] = getLast(nonVRMeditation);
+            if (vrMeditation.Count != 0)
+                ws.Cells[x + 4, y] = getLast(vrMeditation);
+            if (deltaVRnonVRAttention.Count != 0)
+                ws.Cells[x + 5, y] = getLast(deltaVRnonVRAttention);
+            if (deltaVRandBaselineAttention.Count != 0)
+                ws.Cells[x + 6, y] = getLast(deltaVRandBaselineAttention);
+            if (deltaNonVRandBaselineAttention.Count != 0)
+                ws.Cells[x + 7, y] = getLast(deltaNonVRandBaselineAttention);
+            if (deltaVRnonVRMeditation.Count != 0)
+                ws.Cells[x + 8, y] = getLast(deltaVRnonVRMeditation);
+            if (deltaVRandBaselineMeditation.Count != 0)
+                ws.Cells[x + 9, y] = getLast(deltaVRandBaselineMeditation);
+            if (deltaNonVRandBaselineMeditation.Count != 0)
+                ws.Cells[x + 10, y] = getLast(deltaNonVRandBaselineMeditation);
+        }
+
+        public void writeAverageDownColumn(int x, int y, Worksheet ws)
+        {
+            if (nonVRAttention.Count != 0)
+                ws.Cells[x + 1, y] = getAverage(nonVRAttention);
+            if (vrAttention.Count != 0)
+                ws.Cells[x + 2, y] = getAverage(vrAttention);
+            if (nonVRMeditation.Count != 0)
+                ws.Cells[x + 3, y] = getAverage(nonVRMeditation);
+            if (vrMeditation.Count != 0)
+                ws.Cells[x + 4, y] = getAverage(vrMeditation);
+            if (deltaVRnonVRAttention.Count != 0)
+                ws.Cells[x + 5, y] = getAverage(deltaVRnonVRAttention);
+            if (deltaVRandBaselineAttention.Count != 0)
+                ws.Cells[x + 6, y] = getAverage(deltaVRandBaselineAttention);
+            if (deltaNonVRandBaselineAttention.Count != 0)
+                ws.Cells[x + 7, y] = getAverage(deltaNonVRandBaselineAttention);
+            if (deltaVRnonVRMeditation.Count != 0)
+                ws.Cells[x + 8, y] = getAverage(deltaVRnonVRMeditation);
+            if (deltaVRandBaselineMeditation.Count != 0)
+                ws.Cells[x + 9, y] = getAverage(deltaVRandBaselineMeditation);
+            if (deltaNonVRandBaselineMeditation.Count != 0)
+                ws.Cells[x + 10, y] = getAverage(deltaNonVRandBaselineMeditation);
         }  
 
-        private int getAverage(List<int> list)
+        protected int getAverage(List<int> list)
         {
-            return list.Sum() / list.Count;
+            return list.Count == 0 ? -1 : list.Sum() / list.Count;
         }
 
-        private int getLast(List<int> list)
+        protected int getLast(List<int> list)
+        {
+            return list.Count == 0 ? -1 : list[list.Count - 1];
+        }
+
+        protected double getAverage(List<double> list)
+        {
+            return list.Count == 0 ? -1 : list.Sum() / list.Count;
+        }
+
+        protected double getLast(List<double> list)
         {
             return list.Count == 0 ? -1 : list[list.Count - 1];
         }
@@ -111,23 +156,41 @@ namespace ResultCombiner
         public List<int> vrFireworksSpawned;
         public List<int> nonVRFireworksSpawned;
 
+        public List<double> vrTotalInteractionTimes;
+        public List<double> nonVRTotalInteractionTimes;
+
         public Exp2Store()
             : base()
         {
             vrFireworksSpawned = new List<int>();
             nonVRFireworksSpawned = new List<int>();
+
+            vrTotalInteractionTimes = new List<double>();
+            nonVRTotalInteractionTimes = new List<double>();
         }
 
-        public override void writeDownColumn(int x, int y, Worksheet ws)
+        public static void writeResultStoreTemplate(Worksheet ws, int x, int y)
         {
-            base.writeDownColumn(x, y, ws);
-
-            //ws.Cells[x + 11, y] = //TODO: write the spawn times
+            ws.Cells[x, y] = "Non-VR Fireworks Spawned";
+            ws.Cells[x + 1, y] = "VR Fireworks Spawned";
+            ws.Cells[x + 2, y] = "Non-VR Interaction Duration";
+            ws.Cells[x + 3, y] = "VR Interaction Duration";
         }
 
-        public override void writeLastResultDownColumn(int x, int y, Worksheet ws)
+        public new void writeAverageDownColumn(int x, int y, Worksheet ws)
         {
-            base.writeLastResultDownColumn(x, y, ws);
+            ws.Cells[x, y] = getAverage(nonVRFireworksSpawned);
+            ws.Cells[x + 1, y] = getAverage(vrFireworksSpawned);
+            ws.Cells[x + 2, y] = getAverage(vrTotalInteractionTimes);
+            ws.Cells[x + 3, y] = getAverage(nonVRTotalInteractionTimes);
+        }
+
+        public new void writeLastResultDownColumn(int x, int y, Worksheet ws)
+        {
+            ws.Cells[x, y] = getLast(nonVRFireworksSpawned);
+            ws.Cells[x + 1, y] = getLast(vrFireworksSpawned);
+            ws.Cells[x + 2, y] = getLast(vrTotalInteractionTimes);
+            ws.Cells[x + 3, y] = getLast(nonVRTotalInteractionTimes);
         }
     }
 
@@ -143,14 +206,22 @@ namespace ResultCombiner
             nonVRTimesTaken = new List<double>();
         }
 
-        public override void writeDownColumn(int x, int y, Worksheet ws)
+        public new static void writeResultStoreTemplate(Worksheet ws, int x, int y)
         {
-            base.writeDownColumn(x, y, ws);
+            ws.Cells[x, y] = "Non-VR Tag Duration";
+            ws.Cells[x + 1, y] = "VR Tag Duration";
         }
 
-        public override void writeLastResultDownColumn(int x, int y, Worksheet ws)
+        public new void writeAverageDownColumn(int x, int y, Worksheet ws)
         {
-            base.writeLastResultDownColumn(x, y, ws);
+            ws.Cells[x, y] = getAverage(nonVRTimesTaken);
+            ws.Cells[x + 1, y] = getAverage(vrTimesTaken);
+        }
+
+        public new void writeLastResultDownColumn(int x, int y, Worksheet ws)
+        {
+            ws.Cells[x, y] = getLast(nonVRTimesTaken);
+            ws.Cells[x + 1, y] = getLast(vrTimesTaken);
         }
     }
 }

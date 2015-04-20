@@ -19,6 +19,22 @@ namespace ResultCombiner
         public T vr;
     }
 
+    class UserScore
+    {
+        public int score;
+        public string name;
+
+        public UserScore(string user)
+        {
+            name = user;
+        }
+
+        public override string ToString()
+        {
+            return name + " (" + score + ")";
+        }
+    }
+
     class Program
     {
         const string MAIN_DIR = @"J:\Users\Peter\SkyDrive\Documents\CSC 4001\ExperimentResults\";
@@ -45,12 +61,12 @@ namespace ResultCombiner
         ResultsPair<int> _exp3Attention;
         ResultsPair<int> _exp3Meditation;
 
-        Worksheet _baselineSheet;
-        string _bAttentionStart;
-        string _bAttentionEnd;
-
-        string _bMeditationStart;
-        string _bMeditationEnd;
+        int _relaxScore;
+        int _fireworkScore;
+        int _tagScore;
+        int _gameExperience;
+        int _vrMapScores;
+        int _controlSchemeRate;
 
         #endregion
 
@@ -59,6 +75,34 @@ namespace ResultCombiner
         ExpResultStore _exp1Store;
         Exp2Store _exp2Store;
         Exp3Store _exp3Store;
+
+        QuestionaireResultStore _exp1QStore;
+        QuestionaireResultStore _exp2QStore;
+        QuestionaireResultStore _exp3QStore;
+
+        #endregion
+
+        #region awards
+
+        UserScore _lowestMedBase;
+        UserScore _lowestAttBase;
+        UserScore _mostFireworks;
+        UserScore _leastFireworks;
+        UserScore _fastestTagVR;
+        UserScore _fastestTagKB;
+        UserScore _slowestTagKB;
+        UserScore _mostRelaxed;
+        UserScore _longestEEG;
+
+        UserScore _plowestMedBase;
+        UserScore _plowestAttBase;
+        UserScore _pmostFireworks;
+        UserScore _pleastFireworks;
+        UserScore _pfastestTagVR;
+        UserScore _pfastestTagKB;
+        UserScore _plowestTagKB;
+        UserScore _pmostRelaxed;
+        UserScore _plongestEEG;
 
         #endregion
 
@@ -81,6 +125,7 @@ namespace ResultCombiner
 
             for (int i = 0; i < participantFiles.Length; i++)
             {
+                   
                 //each excel file has a deconstructor file associated with it for some reason
                 if (participantFiles[i].Contains("~") == true)
                     continue;
@@ -90,13 +135,27 @@ namespace ResultCombiner
                 if (File.Exists(resultsFilepath) == true)
                     File.Delete(resultsFilepath);
 
-                File.Copy(participantFiles[0], resultsFilepath);
+                File.Copy(participantFiles[i], resultsFilepath);
 
                 Workbook participantWb = _xlApp.Workbooks.Open(Path.GetFullPath(resultsFilepath), Type.Missing, false);
 
                 _baselineAttention = 0;
                 _baselineMeditation = 0;
                 _participantWs = null;
+
+                string fileNameNoExt = Path.GetFileNameWithoutExtension(participantFiles[i]);
+                Console.WriteLine("Processing " + fileNameNoExt);
+
+                _plowestMedBase = new UserScore(fileNameNoExt);
+                _plowestAttBase = new UserScore(fileNameNoExt);
+                _pmostFireworks = new UserScore(fileNameNoExt);
+                _pfastestTagVR = new UserScore(fileNameNoExt);
+                _pfastestTagKB = new UserScore(fileNameNoExt);
+                _pmostRelaxed = new UserScore(fileNameNoExt);
+                _pmostRelaxed.score = 100;
+                _plongestEEG = new UserScore(fileNameNoExt);
+                _pleastFireworks = new UserScore(fileNameNoExt);
+                _plowestTagKB = new UserScore(fileNameNoExt);
 
                 try
                 {
@@ -110,6 +169,17 @@ namespace ResultCombiner
                         else if (loopedWorksheet.Name == "Participant")
                         {
                             _participantWs = loopedWorksheet;
+
+                            _relaxScore = (int)_participantWs.Cells[3, 4].Value;
+                            _fireworkScore = (int)_participantWs.Cells[4, 4].Value;
+                            _tagScore = (int)_participantWs.Cells[5, 4].Value;
+                            _gameExperience = (int)_participantWs.Cells[8, 4].Value;
+                            _vrMapScores = (int)_participantWs.Cells[7, 4].Value;
+                            _controlSchemeRate = (int)_participantWs.Cells[10, 4].Value;
+
+                            addBasicScoresToStore(_exp1QStore, _relaxScore - 1, _controlSchemeRate, _vrMapScores, _gameExperience);
+                            addBasicScoresToStore(_exp2QStore, _fireworkScore - 1, _controlSchemeRate, _vrMapScores, _gameExperience);
+                            addBasicScoresToStore(_exp3QStore, _tagScore - 1, _controlSchemeRate, _vrMapScores, _gameExperience);
                         }
                     }
 
@@ -128,10 +198,12 @@ namespace ResultCombiner
                                 processTagExperiment(loopedWorksheet);
                                 break;
                         }
-                    }
-                    if (_participantWs != null)
-                    {
-                        
+
+                        if (loopedWorksheet.Name.Contains("Sanity"))
+                        {
+                            //read how many values it took
+                            _plongestEEG.score += (int)loopedWorksheet.Cells[2, 2].Value;
+                        }
                     }
                 }
                 catch (Exception e)
@@ -147,11 +219,31 @@ namespace ResultCombiner
                 calulcateStoreValues(_exp2Attention, _exp2Meditation, _exp2Store);
                 calulcateStoreValues(_exp3Attention, _exp3Meditation, _exp3Store);
 
+                calulcateStoreValues(_exp1Attention, _exp1Meditation, _exp1QStore.feedbackScores[_relaxScore - 1]);
+                calulcateStoreValues(_exp2Attention, _exp2Meditation, _exp2QStore.feedbackScores[_fireworkScore - 1]);
+                calulcateStoreValues(_exp3Attention, _exp3Meditation, _exp3QStore.feedbackScores[_tagScore - 1]);
+
                 //write their personal results down
                 if (_participantWs != null)
+                {
                     writeLastResultStoreValToWS(_participantWs, 2, 6);
+                }
 
                 participantWb.Close(true);
+
+                if (_plongestEEG.name.Contains("Meier") || _plongestEEG.name.Contains("Lockhart"))
+                    continue;
+
+                //calulate high scores
+                _lowestMedBase = chooseLowestScore(_plowestMedBase, _lowestMedBase);
+                _lowestAttBase = chooseLowestScore(_plowestAttBase, _lowestAttBase);
+                _mostFireworks = chooseHighestScore(_pmostFireworks, _mostFireworks);
+                _leastFireworks = chooseLowestScore(_pleastFireworks, _leastFireworks);
+                _fastestTagVR = chooseLowestScore(_pfastestTagVR, _fastestTagVR);
+                _fastestTagKB = chooseLowestScore(_pfastestTagKB, _fastestTagKB);
+                _slowestTagKB = chooseHighestScore(_plowestTagKB, _slowestTagKB);
+                _longestEEG = chooseHighestScore(_plongestEEG, _longestEEG);
+                _mostRelaxed = chooseLowestScore(_pmostRelaxed, _mostRelaxed);
             }
 
             if (errorParsing == false)
@@ -160,7 +252,7 @@ namespace ResultCombiner
                 Workbook workBook = _xlApp.Workbooks.Add(1);
                 Worksheet mainSheet = workBook.Worksheets.get_Item(1);
 
-                writeResultStoresToWorksheet(mainSheet, 1, 1);
+                writeResultStoresToWorksheet(mainSheet, 2, 1);
 
                 string resultsFilePath = MAIN_DIR + RESULTS_FOLDER + "\\" + "CombinedResults" + ".xlsx";
 
@@ -170,9 +262,37 @@ namespace ResultCombiner
                 workBook.SaveAs(resultsFilePath);
                 workBook.Close();
             }
+
+            Console.WriteLine("lowest med base: " + _lowestMedBase);
+            Console.WriteLine("lowest att base: " + _lowestAttBase);
+            Console.WriteLine("most fireworks: " + _mostFireworks);
+            Console.WriteLine("least fireworks: " + _leastFireworks);
+            Console.WriteLine("tag VR fast: " + _fastestTagVR);
+            Console.WriteLine("tag KB fast: " + _fastestTagKB);
+            Console.WriteLine("tag KB slow: " + _slowestTagKB);
+            Console.WriteLine("longest eeg: " + _longestEEG);
+            Console.WriteLine("most relaxed:  " + _mostRelaxed);
+
+            //while (true) { }
+        }
+        UserScore chooseLowestScore(UserScore u1, UserScore u2)
+        {
+            return (u1.score <= u2.score ? u1 : u2);
+        }
+
+        UserScore chooseHighestScore(UserScore u1, UserScore u2)
+        {
+            return (u1.score > u2.score ? u1 : u2);
         }
 
         #region Combining the data and experiment stores
+
+        private void addBasicScoresToStore(QuestionaireResultStore store, int index, int csScores, int mapScores, int gameScores)
+        {
+            store.controlSchemeScores[index].Add(csScores);
+            store.vrMapScores[index].Add(mapScores);
+            store.gameExperienceScores[index].Add(gameScores);
+        }
 
         /// <summary>
         /// Writes all of the data in the results store to the given work sheet.
@@ -182,12 +302,32 @@ namespace ResultCombiner
         /// <param name="y">Cell y coordinates, starting at 1</param>
         private void writeResultStoresToWorksheet(Worksheet ws, int x, int y)
         {
-            writeResultStoreTemplate(ws, x, y);
+            //column labels
+            ws.Cells[x, y + 1] = "Experiment 1";
+            ws.Cells[x, y + 2] = "Experiment 2";
+            ws.Cells[x, y + 3] = "Experiment 3";
+
+            ExpResultStore.writeResultStoreTemplate(ws, x, y);
+            Exp2Store.writeResultStoreTemplate(ws, x + 12, y);
+            Exp3Store.writeResultStoreTemplate(ws, x + 17, y);
 
             //write the basic experiment store data down a column
-            _exp1Store.writeDownColumn(x + 1, y + 1, ws);
-            _exp2Store.writeDownColumn(x + 1, y + 2, ws);
-            _exp3Store.writeDownColumn(x + 1, y + 3, ws);
+            _exp1Store.writeAverageDownColumn(x, y + 1, ws);
+            ((ExpResultStore)(_exp2Store)).writeAverageDownColumn(x, y + 2, ws);
+            _exp2Store.writeAverageDownColumn(x + 12, y + 2, ws);
+            ((ExpResultStore)(_exp3Store)).writeAverageDownColumn(x, y + 3, ws);
+            _exp3Store.writeAverageDownColumn(x + 17, y + 3, ws);
+
+            ws.Cells[x - 1, y + 6] = "Experiment 1";
+            ws.Cells[x - 1, y + 13] = "Experiment 2";
+            ws.Cells[x - 1, y + 20] = "Experiment 3";
+            ExpResultStore.writeResultStoreTemplate(ws, x + 3, y + 6);
+            ExpResultStore.writeResultStoreTemplate(ws, x + 3, y + 13);
+            ExpResultStore.writeResultStoreTemplate(ws, x + 3, y + 20);
+
+            _exp1QStore.writeAverageWithTemplate(ws, x, y + 6);
+            _exp2QStore.writeAverageWithTemplate(ws, x, y + 13);
+            _exp3QStore.writeAverageWithTemplate(ws, x, y + 20);
         }
 
         /// <summary>
@@ -197,39 +337,32 @@ namespace ResultCombiner
         /// <param name="y">Cell y coordinates, starting at 1</param>
         private void writeLastResultStoreValToWS(Worksheet ws, int x, int y)
         {
-            writeResultStoreTemplate(ws, x, y);
-
-            //write the basic experiment store data down a column
-            _exp1Store.writeLastResultDownColumn(x + 1, y + 1, ws);
-            _exp2Store.writeLastResultDownColumn(x + 1, y + 2, ws);
-            _exp3Store.writeLastResultDownColumn(x + 1, y + 3, ws);
-        }
-
-        private static void writeResultStoreTemplate(Worksheet ws, int x, int y)
-        {
-            //row labels
-            ws.Cells[x + 1, y] = "Non-VR Attention";
-            ws.Cells[x + 2, y] = "VR Attention";
-            ws.Cells[x + 3, y] = "Non-VR Meditation";
-            ws.Cells[x + 4, y] = "VR Meditation";
-            ws.Cells[x + 5, y] = "VR Attention - Non-Vr Attention";
-            ws.Cells[x + 6, y] = "VR Attention - Baseline Attention";
-            ws.Cells[x + 7, y] = "Non-VR Attention - Baseline Attention";
-            ws.Cells[x + 8, y] = "VR Meditation - Non-Vr Meditation";
-            ws.Cells[x + 9, y] = "VR Meditation - Baseline Meditation";
-            ws.Cells[x + 10, y] = "Non-VR Meditation - Baseline Meditation";
-
-            ws.Cells[x + 12, y] = "Non-VR Fireworks Spawned";
-            ws.Cells[x + 13, y] = "VR Fireworks Spawned";
-
-            ws.Cells[x + 14, y] = "Non-VR Tag Duration";
-            ws.Cells[x + 15, y] = "VR Tag Duration";
-
             //column labels
             ws.Cells[x, y + 1] = "Experiment 1";
             ws.Cells[x, y + 2] = "Experiment 2";
             ws.Cells[x, y + 3] = "Experiment 3";
-            
+
+            ExpResultStore.writeResultStoreTemplate(ws, x, y);
+            Exp2Store.writeResultStoreTemplate(ws, x + 12, y);
+            Exp3Store.writeResultStoreTemplate(ws, x + 17, y);
+
+            //write the basic experiment store data down a column
+            _exp1Store.writeLastResultDownColumn(x, y + 1, ws);
+            ((ExpResultStore)(_exp2Store)).writeLastResultDownColumn(x, y + 2, ws);
+            _exp2Store.writeLastResultDownColumn(x + 12, y + 2, ws);
+            ((ExpResultStore)(_exp3Store)).writeLastResultDownColumn(x, y + 3, ws);
+            _exp3Store.writeLastResultDownColumn(x + 17, y + 3, ws);
+
+            ws.Cells[x - 1, y + 6] = "Experiment 1";
+            ws.Cells[x - 1, y + 13] = "Experiment 2";
+            ws.Cells[x - 1, y + 20] = "Experiment 3";
+            ExpResultStore.writeResultStoreTemplate(ws, x + 3, y + 6);
+            ExpResultStore.writeResultStoreTemplate(ws, x + 3, y + 13);
+            ExpResultStore.writeResultStoreTemplate(ws, x + 3, y + 20);
+
+            _exp1QStore.writeLastWithTemplate(ws, x, y + 6);
+            _exp2QStore.writeLastWithTemplate(ws, x, y + 13);
+            _exp3QStore.writeLastWithTemplate(ws, x, y + 20);
         }
 
         /// <summary>
@@ -413,7 +546,7 @@ namespace ResultCombiner
                 DateTime tempDate = dataStartDate;
                 tempDate = tempDate.AddSeconds(tempStamp);
 
-                if (tempDate > eegStartTime && tempDate < eegEndTime)
+                if (eegStartTime == eegEndTime || (tempDate > eegStartTime && tempDate < eegEndTime))
                     //now change the timestamps to now be timestamps from the experiment start time, rather than the unreal engine start time
                     timeStamps.Add((tempDate - eegStartTime).TotalSeconds);
             }
@@ -430,6 +563,9 @@ namespace ResultCombiner
             //average all the attention values
             _baselineAttention = (int)ws.Cells[2, 3].Value;
             _baselineMeditation = (int)ws.Cells[2, 6].Value;
+
+            _plowestAttBase.score = _baselineAttention;
+            _plowestMedBase.score = _baselineMeditation;
             
             Chart generatedChart = generateChartForMeditationAndAttention(ws);
         }
@@ -438,6 +574,8 @@ namespace ResultCombiner
         {
             generateChartForMeditationAndAttention(ws);
             recordAverageValues(ws, ref _exp1Attention, ref _exp1Meditation);
+
+            _pmostRelaxed.score = Math.Min(_pmostRelaxed.score, (int)ws.Cells[2, 6].Value);
         }
 
 
@@ -494,9 +632,16 @@ namespace ResultCombiner
             recordAverageValues(ws, ref _exp3Attention, ref _exp3Meditation);
 
             if (ws.Name.Contains("KB") == true)
+            {
                 _exp3Store.nonVRTimesTaken.Add(tagStamps[tagStamps.Length - 1]);
+                _pfastestTagKB.score = (int)tagStamps[tagStamps.Length - 1];
+                _plowestTagKB.score = (int)tagStamps[tagStamps.Length - 1];
+            }
             else if (ws.Name.Contains("VR") == true)
+            {
                 _exp3Store.vrTimesTaken.Add(tagStamps[tagStamps.Length - 1]);
+                _pfastestTagVR.score = (int)tagStamps[tagStamps.Length - 1];
+            }
         }
 
 
@@ -538,12 +683,12 @@ namespace ResultCombiner
             ws.Cells[3, 10] = "Spawn times";
             ws.Cells[3, 11] = spawnStamps.Length;
             writeDataDownColumn(ws, spawnStamps, 4, 10);
-            writeDataDownColumn(ws, Enumerable.Repeat<int>(50, spawnStamps.Length).ToArray(), 4, 11);
+            writeDataDownColumn(ws, Enumerable.Repeat<int>(40, spawnStamps.Length).ToArray(), 4, 11);
 
             ws.Cells[3, 13] = "Explosion times";
             ws.Cells[3, 14] = explosionStamps.Length;
             writeDataDownColumn(ws, explosionStamps, 4, 13);
-            writeDataDownColumn(ws, Enumerable.Repeat<int>(50, explosionStamps.Length).ToArray(), 4, 14);
+            writeDataDownColumn(ws, Enumerable.Repeat<int>(60, explosionStamps.Length).ToArray(), 4, 14);
 
             omitEEGResultsBeforeTime(lowestStamp, ws);
 
@@ -573,9 +718,18 @@ namespace ResultCombiner
             recordAverageValues(ws, ref _exp2Attention, ref _exp2Meditation);
 
             if (ws.Name.Contains("KB") == true)
+            {
                 _exp2Store.nonVRFireworksSpawned.Add(spawnStamps.Length);
+                _exp2Store.nonVRTotalInteractionTimes.Add(explosionStamps[explosionStamps.Length - 1]);
+            }
             else if (ws.Name.Contains("VR") == true)
+            {
                 _exp2Store.vrFireworksSpawned.Add(spawnStamps.Length);
+                _exp2Store.vrTotalInteractionTimes.Add(explosionStamps[explosionStamps.Length - 1]);
+            }
+
+            _pmostFireworks.score += spawnStamps.Length;
+            _pleastFireworks.score += spawnStamps.Length;
         }
 
 #endregion
@@ -714,6 +868,26 @@ namespace ResultCombiner
             _exp1Store = new ExpResultStore();
             _exp2Store = new Exp2Store();
             _exp3Store = new Exp3Store();
+
+            _exp1QStore = new QuestionaireResultStore(5);
+            _exp2QStore = new QuestionaireResultStore(5);
+            _exp3QStore = new QuestionaireResultStore(5);
+
+            _lowestMedBase = new UserScore("none");
+            _lowestMedBase.score = 100;
+            _lowestAttBase = new UserScore("none");
+            _lowestAttBase.score = 100;
+            _mostFireworks = new UserScore("none");
+            _leastFireworks = new UserScore("none");
+            _leastFireworks.score = 100;
+            _fastestTagVR = new UserScore("none");
+            _fastestTagVR.score = 100;
+            _fastestTagKB = new UserScore("none");
+            _fastestTagKB.score = 100;
+            _slowestTagKB = new UserScore("none");
+            _mostRelaxed = new UserScore("none");
+            _mostRelaxed.score = 100;
+            _longestEEG = new UserScore("none");
         }
 
         ~Program()
