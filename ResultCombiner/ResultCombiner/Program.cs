@@ -119,7 +119,6 @@ namespace ResultCombiner
 
         static void Main(string[] args)
         {
-
             new Program();
         }
 
@@ -134,8 +133,8 @@ namespace ResultCombiner
 
             bool errorParsing = false;
 
-            //for (int i = 0; i < participantFiles.Length; i++)
-            for (int i = 0; i < 2; i++)
+            for (int i = 0; i < participantFiles.Length; i++)
+            //for (int i = 0; i < 3; i++)
             {
                    
                 //each excel file has a deconstructor file associated with it for some reason
@@ -176,10 +175,13 @@ namespace ResultCombiner
                     {
                         if (loopedWorksheet.Name == "Exp Baseline")
                         {
+                            Console.WriteLine("Generating Baseline EEG.......");
                             processBaseline(loopedWorksheet);
                         }
                         else if (loopedWorksheet.Name == "Participant")
                         {
+                            Console.WriteLine("Gathering Participant Questionaaire results.......");
+
                             _participantWs = loopedWorksheet;
 
                             _relaxScore = (int)_participantWs.Cells[3, 4].Value;
@@ -214,12 +216,15 @@ namespace ResultCombiner
                         switch (loopedWorksheet.Name[4])
                         {
                             case '1':
+                                Console.WriteLine("Processing Relaxation Experiment.......");
                                 processRelaxExperiment(loopedWorksheet);
                                 break;
-                            case '2': 
+                            case '2':
+                                Console.WriteLine("Processing Firework Experiment.......");
                                 processFireworkExperiment(loopedWorksheet);
                                 break;
                             case '3':
+                                Console.WriteLine("Processing Tag Experiment.......");
                                 processTagExperiment(loopedWorksheet);
                                 break;
                         }
@@ -239,10 +244,14 @@ namespace ResultCombiner
                     break;
                 }
 
+                Console.WriteLine("***Calculating Standard Deviations***");
+
                 //now calculate the other variables in the stores for each experiment
                 calulcateStoreValues(_exp1Attention, _exp1Meditation, _exp1Store);
                 calulcateStoreValues(_exp2Attention, _exp2Meditation, _exp2Store);
                 calulcateStoreValues(_exp3Attention, _exp3Meditation, _exp3Store);
+
+                Console.WriteLine("***Calculating Global Running Total and Average***");
 
                 calulcateStoreValues(_exp1Attention, _exp1Meditation, _exp1QStore.feedbackStores[_relaxScore - 1]);
                 calulcateStoreValues(_exp2Attention, _exp2Meditation, _exp2QStore.feedbackStores[_fireworkScore - 1]);
@@ -251,10 +260,17 @@ namespace ResultCombiner
                 //write their personal results down
                 if (_participantWs != null)
                 {
+                    Console.WriteLine("Recording Summary data for participant");
                     writeLastResultStoreValToWS(_participantWs, 2, 6);
                 }
 
                 participantWb.Close(true);
+
+                Console.WriteLine();
+                Console.WriteLine("============================================");
+                Console.WriteLine("============================================");
+                Console.WriteLine("============================================");
+                Console.WriteLine();
 
                 if (_plongestEEG.name.Contains("Meier") || _plongestEEG.name.Contains("Lockhart"))
                     continue;
@@ -277,8 +293,14 @@ namespace ResultCombiner
                 Workbook workBook = _xlApp.Workbooks.Add(1);
                 Worksheet mainSheet = workBook.Worksheets.get_Item(1);
 
+                Console.WriteLine("***Writing Experiment results to Summary Sheet***");
                 writeResultStoresToWorksheet(mainSheet, 2, 1);
+
+                Console.WriteLine("***Writing Results sorted by rating to Summary Sheet***");
                 writeOverallResultSummary(mainSheet, 1, 28);
+
+                Console.WriteLine("***Generating charts for Summary Sheet***");
+                generateChartsForSummaryData(mainSheet);
 
                 string resultsFilePath = MAIN_DIR + RESULTS_FOLDER + "\\" + "CombinedResults" + ".xlsx";
 
@@ -288,6 +310,10 @@ namespace ResultCombiner
                 workBook.SaveAs(resultsFilePath);
                 workBook.Close();
             }
+
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine();
 
             Console.WriteLine("lowest med base: " + _lowestMedBase);
             Console.WriteLine("lowest att base: " + _lowestAttBase);
@@ -318,8 +344,8 @@ namespace ResultCombiner
             mainSheet.Cells[x + 1, y + 3] = "Relax Average";
             mainSheet.Cells[x + 2, y + 3] = "Firework Average";
             mainSheet.Cells[x + 3, y + 3] = "Tag Average";
-            mainSheet.Cells[x + 4, y + 3] = "Exprience Average";
-            mainSheet.Cells[x + 5, y + 3] = "Mapping Average";
+            mainSheet.Cells[x + 4, y + 3] = "Game Experience Average";
+            mainSheet.Cells[x + 5, y + 3] = "VR Mapping Average";
             mainSheet.Cells[x + 6, y + 3] = "Control Scheme Average";
             mainSheet.Cells[x + 7, y + 3] = "VR Experience Average";
             
@@ -858,6 +884,431 @@ namespace ResultCombiner
         }
 
         #region Graph Generation
+
+        private void generateChartsForSummaryData(Worksheet ws)
+        {
+            //create a graph from the data range
+            ChartObjects xlCharts = ws.ChartObjects(Type.Missing);
+
+            #region Summary Data
+
+            //Summary VR and nonVR relative meditation
+            {
+                ChartObject chartObject = xlCharts.Add(5, 600, 375, 220);
+                Chart chartPage = chartObject.Chart;
+                chartPage.ChartType = XlChartType.xlColumnClustered;
+                chartPage.HasTitle = true;
+                chartPage.ChartTitle.Text = "Change in Meditation";
+
+                SeriesCollection sc = chartPage.SeriesCollection();
+
+                Series series1 = sc.NewSeries();
+                series1.XValues = ws.get_Range("B2", "D2");
+                series1.Values = ws.get_Range("B11", "D11");
+                series1.Name = "VR Meditation - Baseline";
+                series1.ErrorBar(XlErrorBarDirection.xlY, XlErrorBarInclude.xlErrorBarIncludeBoth, XlErrorBarType.xlErrorBarTypeCustom, ws.get_Range("B17", "D17"), ws.get_Range("B17", "D17"));
+
+                Series series2 = sc.NewSeries();
+                series2.XValues = ws.get_Range("B2", "D2");
+                series2.Values = ws.get_Range("B12", "D12");
+                series2.Name = "Non-VR Meditation - Baseline";
+                series2.ErrorBar(XlErrorBarDirection.xlY, XlErrorBarInclude.xlErrorBarIncludeBoth, XlErrorBarType.xlErrorBarTypeCustom, ws.get_Range("B18", "D18"), ws.get_Range("B18", "D18"));
+            }
+
+            //Summary VR and nonVR relative attention
+            {
+                ChartObject chartObject = xlCharts.Add(5, 850, 375, 220);
+                Chart chartPage = chartObject.Chart;
+                chartPage.ChartType = XlChartType.xlColumnClustered;
+                chartPage.HasTitle = true;
+                chartPage.ChartTitle.Text = "Change in Attention";
+
+                SeriesCollection sc = chartPage.SeriesCollection();
+
+                Series series1 = sc.NewSeries();
+                series1.XValues = ws.get_Range("B2", "D2");
+                series1.Values = ws.get_Range("B8", "D8");
+                series1.Name = "VR Attention - Baseline";
+                series1.ErrorBar(XlErrorBarDirection.xlY, XlErrorBarInclude.xlErrorBarIncludeBoth, XlErrorBarType.xlErrorBarTypeCustom, ws.get_Range("B15", "D15"), ws.get_Range("B15", "D15"));
+
+                Series series2 = sc.NewSeries();
+                series2.XValues = ws.get_Range("B2", "D2");
+                series2.Values = ws.get_Range("B9", "D9");
+                series2.Name = "Non-VR Attention - Baseline";
+                series2.ErrorBar(XlErrorBarDirection.xlY, XlErrorBarInclude.xlErrorBarIncludeBoth, XlErrorBarType.xlErrorBarTypeCustom, ws.get_Range("B16", "D16"), ws.get_Range("B16", "D16"));
+            }
+
+            //relative meditation comparison
+            {
+                ChartObject chartObject = xlCharts.Add(5, 1050, 375, 220);
+                Chart chartPage = chartObject.Chart;
+                chartPage.ChartType = XlChartType.xlColumnClustered;
+                chartPage.HasTitle = true;
+                chartPage.ChartTitle.Text = "Comparison of change in meditation, VR - non-VR";
+
+                SeriesCollection sc = chartPage.SeriesCollection();
+
+                Series series1 = sc.NewSeries();
+                series1.Name = "Relative VR - Relative non-VR";
+                series1.XValues = ws.get_Range("B2", "D2");
+                series1.Values = ws.get_Range("B14", "D14");
+                series1.ErrorBar(XlErrorBarDirection.xlY, XlErrorBarInclude.xlErrorBarIncludeBoth, XlErrorBarType.xlErrorBarTypeCustom, ws.get_Range("B20", "D20"), ws.get_Range("B20", "D20"));
+            }
+
+            //relative attention comparison
+            {
+                ChartObject chartObject = xlCharts.Add(5, 1300, 375, 220);
+                Chart chartPage = chartObject.Chart;
+                chartPage.ChartType = XlChartType.xlColumnClustered;
+                chartPage.HasTitle = true;
+                chartPage.ChartTitle.Text = "Comparison of change in attention, VR - non-VR";
+
+                SeriesCollection sc = chartPage.SeriesCollection();
+
+                Series series1 = sc.NewSeries();
+                series1.Name = "Relative VR - Relative non-VR";
+                series1.XValues = ws.get_Range("B2", "D2");
+                series1.Values = ws.get_Range("B13", "D13");
+                series1.ErrorBar(XlErrorBarDirection.xlY, XlErrorBarInclude.xlErrorBarIncludeBoth, XlErrorBarType.xlErrorBarTypeCustom, ws.get_Range("B19", "D19"), ws.get_Range("B19", "D19"));
+            }
+
+            //firework summary
+            {
+                ChartObject chartObject = xlCharts.Add(5, 1550, 375, 220);
+                Chart chartPage = chartObject.Chart;
+                chartPage.ChartType = XlChartType.xlColumnClustered;
+                chartPage.HasTitle = true;
+                chartPage.ChartTitle.Text = "Fireworks Spawned";
+
+                SeriesCollection sc = chartPage.SeriesCollection();
+
+                Series series1 = sc.NewSeries();
+                series1.XValues = ws.get_Range("C2", "C2");
+                series1.Values = ws.get_Range("C23", "C23");
+                series1.Name = "VR";
+                series1.ErrorBar(XlErrorBarDirection.xlY, XlErrorBarInclude.xlErrorBarIncludeBoth, XlErrorBarType.xlErrorBarTypeCustom, ws.get_Range("C26", "C26"), ws.get_Range("C26", "C26"));
+
+                Series series2 = sc.NewSeries();
+                series2.XValues = ws.get_Range("C2", "C2");
+                series2.Values = ws.get_Range("C22", "C22");
+                series2.Name = "Non-VR";
+                series2.ErrorBar(XlErrorBarDirection.xlY, XlErrorBarInclude.xlErrorBarIncludeBoth, XlErrorBarType.xlErrorBarTypeCustom, ws.get_Range("C27", "C27"), ws.get_Range("C27", "C27"));
+            }
+
+            //tag summary
+            {
+                ChartObject chartObject = xlCharts.Add(5, 1800, 375, 220);
+                Chart chartPage = chartObject.Chart;
+                chartPage.ChartType = XlChartType.xlColumnClustered;
+                chartPage.HasTitle = true;
+                chartPage.ChartTitle.Text = "Time Taken";
+
+                SeriesCollection sc = chartPage.SeriesCollection();
+
+                Series series1 = sc.NewSeries();
+                series1.XValues = ws.get_Range("D2", "D2");
+                series1.Values = ws.get_Range("D31", "D31");
+                series1.Name = "VR";
+                series1.ErrorBar(XlErrorBarDirection.xlY, XlErrorBarInclude.xlErrorBarIncludeBoth, XlErrorBarType.xlErrorBarTypeCustom, ws.get_Range("D32", "D32"), ws.get_Range("D32", "D32"));
+
+                Series series2 = sc.NewSeries();
+                series2.XValues = ws.get_Range("D2", "D2");
+                series2.Values = ws.get_Range("D30", "D30");
+                series2.Name = "Non-VR";
+                series2.ErrorBar(XlErrorBarDirection.xlY, XlErrorBarInclude.xlErrorBarIncludeBoth, XlErrorBarType.xlErrorBarTypeCustom, ws.get_Range("D33", "D33"), ws.get_Range("D33", "D33"));
+            }
+
+            #endregion
+
+            #region Experiment 1
+
+            //experiment 1 relative meditation comparison
+            {
+                ChartObject chartObject = xlCharts.Add(400, 600, 375, 220);
+                Chart chartPage = chartObject.Chart;
+                chartPage.ChartType = XlChartType.xlColumnClustered;
+                chartPage.HasTitle = true;
+                chartPage.ChartTitle.Text = "Comparison of change in meditation, VR - non-VR";
+
+                SeriesCollection sc = chartPage.SeriesCollection();
+
+                Series series1 = sc.NewSeries();
+                series1.Name = "Relative VR - Relative non-VR";
+                series1.XValues = ws.get_Range("H2", "L2");
+                series1.Values = ws.get_Range("H17", "L17");
+                series1.ErrorBar(XlErrorBarDirection.xlY, XlErrorBarInclude.xlErrorBarIncludeBoth, XlErrorBarType.xlErrorBarTypeCustom, ws.get_Range("H23", "L23"), ws.get_Range("H23", "L23"));
+            }
+
+            //experiment 1 VR and nonVR relative meditation
+            {
+                ChartObject chartObject = xlCharts.Add(400, 850, 375, 220);
+                Chart chartPage = chartObject.Chart;
+                chartPage.ChartType = XlChartType.xlColumnClustered;
+                chartPage.HasTitle = true;
+                chartPage.ChartTitle.Text = "Change in Meditation";
+
+                SeriesCollection sc = chartPage.SeriesCollection();
+
+                Series series1 = sc.NewSeries();
+                series1.XValues = ws.get_Range("H2", "L2");
+                series1.Values = ws.get_Range("H14", "L14");
+                series1.Name = "VR Meditation - Baseline";
+                series1.ErrorBar(XlErrorBarDirection.xlY, XlErrorBarInclude.xlErrorBarIncludeBoth, XlErrorBarType.xlErrorBarTypeCustom, ws.get_Range("H20", "L20"), ws.get_Range("H20", "L20"));
+
+                Series series2 = sc.NewSeries();
+                series2.XValues = ws.get_Range("H2", "L2");
+                series2.Values = ws.get_Range("H15", "L15");
+                series2.Name = "Non-VR Meditation - Baseline";
+                series2.ErrorBar(XlErrorBarDirection.xlY, XlErrorBarInclude.xlErrorBarIncludeBoth, XlErrorBarType.xlErrorBarTypeCustom, ws.get_Range("H21", "L21"), ws.get_Range("H21", "L21"));
+            }
+
+            //experiment 1 relative attetion comparison
+            {
+                ChartObject chartObject = xlCharts.Add(400, 1050, 375, 220);
+                Chart chartPage = chartObject.Chart;
+                chartPage.ChartType = XlChartType.xlColumnClustered;
+                chartPage.HasTitle = true;
+                chartPage.ChartTitle.Text = "Comparison of change in attention, VR - non-VR";
+
+                SeriesCollection sc = chartPage.SeriesCollection();
+
+                Series series1 = sc.NewSeries();
+                series1.Name = "Relative VR - Relative non-VR";
+                series1.XValues = ws.get_Range("H2", "L2");
+                series1.Values = ws.get_Range("H17", "L17");
+                series1.ErrorBar(XlErrorBarDirection.xlY, XlErrorBarInclude.xlErrorBarIncludeBoth, XlErrorBarType.xlErrorBarTypeCustom, ws.get_Range("H22", "L22"), ws.get_Range("H22", "L22"));
+            }
+
+            //experiment 1 VR and nonVR attention relative
+            {
+                ChartObject chartObject = xlCharts.Add(400, 1300, 375, 220);
+                Chart chartPage = chartObject.Chart;
+                chartPage.ChartType = XlChartType.xlColumnClustered;
+                chartPage.HasTitle = true;
+                chartPage.ChartTitle.Text = "Change in Attention";
+
+                SeriesCollection sc = chartPage.SeriesCollection();
+
+                Series series1 = sc.NewSeries();
+                series1.XValues = ws.get_Range("H2", "L2");
+                series1.Values = ws.get_Range("H11", "L11");
+                series1.Name = "VR Attention - Baseline";
+                series1.ErrorBar(XlErrorBarDirection.xlY, XlErrorBarInclude.xlErrorBarIncludeBoth, XlErrorBarType.xlErrorBarTypeCustom, ws.get_Range("H18", "L18"), ws.get_Range("H18", "L18"));
+
+                Series series2 = sc.NewSeries();
+                series2.XValues = ws.get_Range("H2", "L2");
+                series2.Values = ws.get_Range("H12", "L12");
+                series2.Name = "Non-VR Attention - Baseline";
+                series2.ErrorBar(XlErrorBarDirection.xlY, XlErrorBarInclude.xlErrorBarIncludeBoth, XlErrorBarType.xlErrorBarTypeCustom, ws.get_Range("H19", "L19"), ws.get_Range("H19", "L19"));
+            }
+
+            #endregion
+
+            #region Experiment 2
+
+            //experiment 2 relative attetion comparison
+            {
+                ChartObject chartObject = xlCharts.Add(800, 600, 375, 220);
+                Chart chartPage = chartObject.Chart;
+                chartPage.ChartType = XlChartType.xlColumnClustered;
+                chartPage.HasTitle = true;
+                chartPage.ChartTitle.Text = "Comparison of change in attention, VR - non-VR";
+
+                SeriesCollection sc = chartPage.SeriesCollection();
+
+                Series series1 = sc.NewSeries();
+                series1.Name = "Relative VR - Relative non-VR";
+                series1.XValues = ws.get_Range("O2", "S2");
+                series1.Values = ws.get_Range("O17", "S17");
+                series1.ErrorBar(XlErrorBarDirection.xlY, XlErrorBarInclude.xlErrorBarIncludeBoth, XlErrorBarType.xlErrorBarTypeCustom, ws.get_Range("O22", "S22"), ws.get_Range("O22", "S22"));
+            }
+
+            //experiment 2 VR and nonVR attention relative
+            {
+                ChartObject chartObject = xlCharts.Add(800, 850, 375, 220);
+                Chart chartPage = chartObject.Chart;
+                chartPage.ChartType = XlChartType.xlColumnClustered;
+                chartPage.HasTitle = true;
+                chartPage.ChartTitle.Text = "Change in Attention";
+
+                SeriesCollection sc = chartPage.SeriesCollection();
+
+                Series series1 = sc.NewSeries();
+                series1.XValues = ws.get_Range("O2", "S2");
+                series1.Values = ws.get_Range("O11", "S11");
+                series1.Name = "VR Attention - Baseline";
+                series1.ErrorBar(XlErrorBarDirection.xlY, XlErrorBarInclude.xlErrorBarIncludeBoth, XlErrorBarType.xlErrorBarTypeCustom, ws.get_Range("O18", "S18"), ws.get_Range("O18", "S18"));
+
+                Series series2 = sc.NewSeries();
+                series2.XValues = ws.get_Range("O2", "S2");
+                series2.Values = ws.get_Range("O12", "S12");
+                series2.Name = "Non-VR Attention - Baseline";
+                series2.ErrorBar(XlErrorBarDirection.xlY, XlErrorBarInclude.xlErrorBarIncludeBoth, XlErrorBarType.xlErrorBarTypeCustom, ws.get_Range("O19", "S19"), ws.get_Range("O19", "S19"));
+            }
+
+            //experiment 2 fireworks spawned
+            {
+                ChartObject chartObject = xlCharts.Add(800, 1050, 375, 220);
+                Chart chartPage = chartObject.Chart;
+                chartPage.ChartType = XlChartType.xlColumnClustered;
+                chartPage.HasTitle = true;
+                chartPage.ChartTitle.Text = "Fireworks Spawned";
+
+                SeriesCollection sc = chartPage.SeriesCollection();
+
+                Series series1 = sc.NewSeries();
+                series1.XValues = ws.get_Range("O2", "S2");
+                series1.Values = ws.get_Range("O26", "S26");
+                series1.Name = "VR";
+                series1.ErrorBar(XlErrorBarDirection.xlY, XlErrorBarInclude.xlErrorBarIncludeBoth, XlErrorBarType.xlErrorBarTypeCustom, ws.get_Range("O29", "S29"), ws.get_Range("O29", "S29"));
+
+                Series series2 = sc.NewSeries();
+                series2.XValues = ws.get_Range("O2", "S2");
+                series2.Values = ws.get_Range("O25", "S25");
+                series2.Name = "Non-VR";
+                series2.ErrorBar(XlErrorBarDirection.xlY, XlErrorBarInclude.xlErrorBarIncludeBoth, XlErrorBarType.xlErrorBarTypeCustom, ws.get_Range("O30", "S30"), ws.get_Range("O30", "S30"));
+            }
+
+            //experiment 2 firework duration
+            {
+                ChartObject chartObject = xlCharts.Add(800, 1300, 375, 220);
+                Chart chartPage = chartObject.Chart;
+                chartPage.ChartType = XlChartType.xlColumnClustered;
+                chartPage.HasTitle = true;
+                chartPage.ChartTitle.Text = "Firework Experiment Duration";
+
+                SeriesCollection sc = chartPage.SeriesCollection();
+
+                Series series1 = sc.NewSeries();
+                series1.XValues = ws.get_Range("O2", "S2");
+                series1.Values = ws.get_Range("O28", "S28");
+                series1.Name = "VR";
+                series1.ErrorBar(XlErrorBarDirection.xlY, XlErrorBarInclude.xlErrorBarIncludeBoth, XlErrorBarType.xlErrorBarTypeCustom, ws.get_Range("O31", "S31"), ws.get_Range("O31", "S31"));
+
+                Series series2 = sc.NewSeries();
+                series2.XValues = ws.get_Range("O2", "S2");
+                series2.Values = ws.get_Range("O27", "S27");
+                series2.Name = "Non-VR";
+                series2.ErrorBar(XlErrorBarDirection.xlY, XlErrorBarInclude.xlErrorBarIncludeBoth, XlErrorBarType.xlErrorBarTypeCustom, ws.get_Range("O32", "S32"), ws.get_Range("O32", "S32"));
+            }
+
+            #endregion
+
+            #region Experiment 3
+
+            //experiment 3 relative attetion comparison
+            {
+                ChartObject chartObject = xlCharts.Add(1200, 600, 375, 220);
+                Chart chartPage = chartObject.Chart;
+                chartPage.ChartType = XlChartType.xlColumnClustered;
+                chartPage.HasTitle = true;
+                chartPage.ChartTitle.Text = "Comparison of change in attention, VR - non-VR";
+
+                SeriesCollection sc = chartPage.SeriesCollection();
+
+                Series series1 = sc.NewSeries();
+                series1.Name = "Relative VR - Relative non-VR";
+                series1.XValues = ws.get_Range("V2", "Z2");
+                series1.Values = ws.get_Range("V17", "Z17");
+                series1.ErrorBar(XlErrorBarDirection.xlY, XlErrorBarInclude.xlErrorBarIncludeBoth, XlErrorBarType.xlErrorBarTypeCustom, ws.get_Range("V22", "Z22"), ws.get_Range("V22", "Z22"));
+            }
+
+            //experiment 3 VR and nonVR attention relative
+            {
+                ChartObject chartObject = xlCharts.Add(1200, 850, 375, 220);
+                Chart chartPage = chartObject.Chart;
+                chartPage.ChartType = XlChartType.xlColumnClustered;
+                chartPage.HasTitle = true;
+                chartPage.ChartTitle.Text = "Change in Attention";
+
+                SeriesCollection sc = chartPage.SeriesCollection();
+
+                Series series1 = sc.NewSeries();
+                series1.XValues = ws.get_Range("V2", "Z2");
+                series1.Values = ws.get_Range("V11", "Z11");
+                series1.Name = "VR Attention - Baseline";
+                series1.ErrorBar(XlErrorBarDirection.xlY, XlErrorBarInclude.xlErrorBarIncludeBoth, XlErrorBarType.xlErrorBarTypeCustom, ws.get_Range("V18", "Z18"), ws.get_Range("V18", "Z18"));
+
+                Series series2 = sc.NewSeries();
+                series2.XValues = ws.get_Range("V2", "Z2");
+                series2.Values = ws.get_Range("V12", "Z12");
+                series2.Name = "Non-VR Attention - Baseline";
+                series2.ErrorBar(XlErrorBarDirection.xlY, XlErrorBarInclude.xlErrorBarIncludeBoth, XlErrorBarType.xlErrorBarTypeCustom, ws.get_Range("V19", "Z19"), ws.get_Range("V19", "Z19"));
+            }
+
+            //experiment 3 duration
+            {
+                ChartObject chartObject = xlCharts.Add(1200, 1050, 375, 220);
+                Chart chartPage = chartObject.Chart;
+                chartPage.ChartType = XlChartType.xlColumnClustered;
+                chartPage.HasTitle = true;
+                chartPage.ChartTitle.Text = "Time Taken";
+
+                SeriesCollection sc = chartPage.SeriesCollection();
+
+                Series series1 = sc.NewSeries();
+                series1.XValues = ws.get_Range("V2", "Z2");
+                series1.Values = ws.get_Range("V34", "Z34");
+                series1.Name = "VR";
+                series1.ErrorBar(XlErrorBarDirection.xlY, XlErrorBarInclude.xlErrorBarIncludeBoth, XlErrorBarType.xlErrorBarTypeCustom, ws.get_Range("V35", "Z35"), ws.get_Range("V35", "Z35"));
+
+                Series series2 = sc.NewSeries();
+                series2.XValues = ws.get_Range("V2", "Z2");
+                series2.Values = ws.get_Range("V33", "Z33");
+                series2.Name = "Non-VR";
+                series2.ErrorBar(XlErrorBarDirection.xlY, XlErrorBarInclude.xlErrorBarIncludeBoth, XlErrorBarType.xlErrorBarTypeCustom, ws.get_Range("V36", "Z36"), ws.get_Range("V36", "Z36"));
+            }
+
+            #endregion
+
+            #region Participants and Rating
+
+            //Gender breakdown
+            {
+                ChartObject chartObject = xlCharts.Add(1600, 600, 375, 220);
+                Chart chartPage = chartObject.Chart;
+                chartPage.ChartType = XlChartType.xlPie;
+                chartPage.HasTitle = true;
+                chartPage.ChartTitle.Text = "Gender Breakdown";
+                chartPage.HasLegend = true;
+
+                SeriesCollection sc = chartPage.SeriesCollection();
+                Series series1 = sc.NewSeries();
+                series1.Values = ws.get_Range("AB3", "AC3");
+                series1.XValues = ws.get_Range("AB2", "AC2");
+                series1.Name = "Sex";
+
+            }
+            //average scores
+            {
+                ChartObject chartObject = xlCharts.Add(2000, 600, 375, 220);
+                Chart chartPage = chartObject.Chart;
+                chartPage.ChartType = XlChartType.xlBarStacked;
+                chartPage.HasTitle = true;
+                chartPage.ChartTitle.Text = "Post-experiment survey ratings";
+                chartPage.HasLegend = true;
+
+                SeriesCollection sc = chartPage.SeriesCollection();
+                Series series1 = sc.NewSeries();
+                series1.Values = ws.get_Range("AF2", "AF8");
+                series1.XValues = ws.get_Range("AE2", "AE8");
+                series1.Name = "Preference";
+                series1.ErrorBar(XlErrorBarDirection.xlY, XlErrorBarInclude.xlErrorBarIncludeBoth, XlErrorBarType.xlErrorBarTypeCustom, ws.get_Range("AG2", "AG8"), ws.get_Range("AG2", "AG8"));
+            }
+
+            #endregion
+
+        }
+
+        private Series createSeriesForSingleData(SeriesCollection sc, Worksheet ws, string valueCoord, string xValueCoord, string name)
+        {
+            Series series1 = sc.NewSeries();
+            series1.Values = ws.get_Range(valueCoord, valueCoord);
+            series1.XValues = ws.get_Range(xValueCoord, xValueCoord);
+            series1.Name = name;
+
+            return series1;
+        }
 
         /// <summary>
         /// Generates a chart for the medtitation and attention values in this worksheet, along with the baseline series 
