@@ -65,7 +65,7 @@ namespace ResultCombiner
         int _fireworkScore;
         int _tagScore;
         int _gameExperience;
-        int _vrMapScores;
+        int _vrMapScore;
         int _controlSchemeRate;
 
         #endregion
@@ -76,9 +76,20 @@ namespace ResultCombiner
         Exp2Store _exp2Store;
         Exp3Store _exp3Store;
 
-        QuestionaireResultStore _exp1QStore;
-        QuestionaireResultStore _exp2QStore;
-        QuestionaireResultStore _exp3QStore;
+        QuestionaireResultStore<ExpResultStore> _exp1QStore;
+        QuestionaireResultStore<Exp2Store> _exp2QStore;
+        QuestionaireResultStore<Exp3Store> _exp3QStore;
+
+        int _numFemales = 0;
+        int _numMales = 0;
+
+        List<int> _relaxScores;
+        List<int> _fireworkScores;
+        List<int> _tagScores;
+        List<int> _gameExperiences;
+        List<int> _vrMapScores;
+        List<int> _controlSchemeRates;
+        List<int> _vrExperiences;
 
         #endregion
 
@@ -123,7 +134,8 @@ namespace ResultCombiner
 
             bool errorParsing = false;
 
-            for (int i = 0; i < participantFiles.Length; i++)
+            //for (int i = 0; i < participantFiles.Length; i++)
+            for (int i = 0; i < 2; i++)
             {
                    
                 //each excel file has a deconstructor file associated with it for some reason
@@ -174,12 +186,25 @@ namespace ResultCombiner
                             _fireworkScore = (int)_participantWs.Cells[4, 4].Value;
                             _tagScore = (int)_participantWs.Cells[5, 4].Value;
                             _gameExperience = (int)_participantWs.Cells[8, 4].Value;
-                            _vrMapScores = (int)_participantWs.Cells[7, 4].Value;
+                            _vrMapScore = (int)_participantWs.Cells[7, 4].Value;
                             _controlSchemeRate = (int)_participantWs.Cells[10, 4].Value;
 
-                            addBasicScoresToStore(_exp1QStore, _relaxScore - 1, _controlSchemeRate, _vrMapScores, _gameExperience);
-                            addBasicScoresToStore(_exp2QStore, _fireworkScore - 1, _controlSchemeRate, _vrMapScores, _gameExperience);
-                            addBasicScoresToStore(_exp3QStore, _tagScore - 1, _controlSchemeRate, _vrMapScores, _gameExperience);
+                            _relaxScores.Add(_relaxScore);
+                            _fireworkScores.Add(_fireworkScore);
+                            _tagScores.Add(_tagScore);
+                            _gameExperiences.Add(_gameExperience);
+                            _vrMapScores.Add(_vrMapScore);
+                            _controlSchemeRates.Add(_controlSchemeRate);
+                            _vrExperiences.Add((int)_participantWs.Cells[9, 4].Value);
+
+                            if ((string)_participantWs.Cells[1, 2].Value == "Male")
+                                _numMales++;
+                            else
+                                _numFemales++;
+
+                            addBasicScoresToStore(_exp1QStore, _relaxScore - 1, _controlSchemeRate, _vrMapScore, _gameExperience);
+                            addBasicScoresToStore(_exp2QStore, _fireworkScore - 1, _controlSchemeRate, _vrMapScore, _gameExperience);
+                            addBasicScoresToStore(_exp3QStore, _tagScore - 1, _controlSchemeRate, _vrMapScore, _gameExperience);
                         }
                     }
 
@@ -219,9 +244,9 @@ namespace ResultCombiner
                 calulcateStoreValues(_exp2Attention, _exp2Meditation, _exp2Store);
                 calulcateStoreValues(_exp3Attention, _exp3Meditation, _exp3Store);
 
-                calulcateStoreValues(_exp1Attention, _exp1Meditation, _exp1QStore.feedbackScores[_relaxScore - 1]);
-                calulcateStoreValues(_exp2Attention, _exp2Meditation, _exp2QStore.feedbackScores[_fireworkScore - 1]);
-                calulcateStoreValues(_exp3Attention, _exp3Meditation, _exp3QStore.feedbackScores[_tagScore - 1]);
+                calulcateStoreValues(_exp1Attention, _exp1Meditation, _exp1QStore.feedbackStores[_relaxScore - 1]);
+                calulcateStoreValues(_exp2Attention, _exp2Meditation, _exp2QStore.feedbackStores[_fireworkScore - 1]);
+                calulcateStoreValues(_exp3Attention, _exp3Meditation, _exp3QStore.feedbackStores[_tagScore - 1]);
 
                 //write their personal results down
                 if (_participantWs != null)
@@ -253,6 +278,7 @@ namespace ResultCombiner
                 Worksheet mainSheet = workBook.Worksheets.get_Item(1);
 
                 writeResultStoresToWorksheet(mainSheet, 2, 1);
+                writeOverallResultSummary(mainSheet, 1, 28);
 
                 string resultsFilePath = MAIN_DIR + RESULTS_FOLDER + "\\" + "CombinedResults" + ".xlsx";
 
@@ -275,6 +301,44 @@ namespace ResultCombiner
 
             //while (true) { }
         }
+
+        //write some summary information about the participants
+        private void writeOverallResultSummary(Worksheet mainSheet, int x, int y)
+        {
+            mainSheet.Cells[x, y] = "Gender Breakdown";
+            mainSheet.Cells[x + 1, y] = "Male";
+            mainSheet.Cells[x + 2, y] = _numMales;
+            mainSheet.Cells[x + 1, y + 1] = "Female";
+            mainSheet.Cells[x + 2, y + 1] = _numFemales;
+
+            //work out the SDs for each participant's stat
+            mainSheet.Cells[x, y + 4] = "Average";
+            mainSheet.Cells[x, y + 5] = "Rating SD";
+
+            mainSheet.Cells[x + 1, y + 3] = "Relax Average";
+            mainSheet.Cells[x + 2, y + 3] = "Firework Average";
+            mainSheet.Cells[x + 3, y + 3] = "Tag Average";
+            mainSheet.Cells[x + 4, y + 3] = "Exprience Average";
+            mainSheet.Cells[x + 5, y + 3] = "Mapping Average";
+            mainSheet.Cells[x + 6, y + 3] = "Control Scheme Average";
+            mainSheet.Cells[x + 7, y + 3] = "VR Experience Average";
+            
+            mainSheet.Cells[x + 1, y + 4] = _relaxScores.getAverage();
+            mainSheet.Cells[x + 2, y + 4] = _fireworkScores.getAverage();
+            mainSheet.Cells[x + 3, y + 4] = _tagScores.getAverage();
+            mainSheet.Cells[x + 4, y + 4] = _gameExperiences.getAverage();
+            mainSheet.Cells[x + 5, y + 4] = _vrMapScores.getAverage();
+            mainSheet.Cells[x + 6, y + 4] = _controlSchemeRates.getAverage();
+            mainSheet.Cells[x + 7, y + 4] = _vrExperiences.getAverage();
+
+            mainSheet.Cells[x + 1, y + 5] = _relaxScores.getSDfromValues();
+            mainSheet.Cells[x + 2, y + 5] = _fireworkScores.getSDfromValues();
+            mainSheet.Cells[x + 3, y + 5] = _tagScores.getSDfromValues();
+            mainSheet.Cells[x + 4, y + 5] = _gameExperiences.getSDfromValues();
+            mainSheet.Cells[x + 5, y + 5] = _vrMapScores.getSDfromValues();
+            mainSheet.Cells[x + 6, y + 5] = _controlSchemeRates.getSDfromValues();
+            mainSheet.Cells[x + 7, y + 5] = _vrExperiences.getSDfromValues();
+        }
         UserScore chooseLowestScore(UserScore u1, UserScore u2)
         {
             return (u1.score <= u2.score ? u1 : u2);
@@ -287,7 +351,7 @@ namespace ResultCombiner
 
         #region Combining the data and experiment stores
 
-        private void addBasicScoresToStore(QuestionaireResultStore store, int index, int csScores, int mapScores, int gameScores)
+        private void addBasicScoresToStore<T>(QuestionaireResultStore<T> store, int index, int csScores, int mapScores, int gameScores) where T : ExpResultStore, new()
         {
             store.controlSchemeScores[index].Add(csScores);
             store.vrMapScores[index].Add(mapScores);
@@ -308,15 +372,13 @@ namespace ResultCombiner
             ws.Cells[x, y + 3] = "Experiment 3";
 
             ExpResultStore.writeResultStoreTemplate(ws, x, y);
-            Exp2Store.writeResultStoreTemplate(ws, x + 12, y);
-            Exp3Store.writeResultStoreTemplate(ws, x + 17, y);
+            Exp2Store.writeResultStoreTemplate(ws, x + 20, y);
+            Exp3Store.writeResultStoreTemplate(ws, x + 28, y);
 
             //write the basic experiment store data down a column
             _exp1Store.writeAverageDownColumn(x, y + 1, ws);
-            ((ExpResultStore)(_exp2Store)).writeAverageDownColumn(x, y + 2, ws);
-            _exp2Store.writeAverageDownColumn(x + 12, y + 2, ws);
-            ((ExpResultStore)(_exp3Store)).writeAverageDownColumn(x, y + 3, ws);
-            _exp3Store.writeAverageDownColumn(x + 17, y + 3, ws);
+            _exp2Store.writeAverageDownColumn(x, y + 2, ws);
+            _exp3Store.writeAverageDownColumn(x, y + 3, ws);
 
             ws.Cells[x - 1, y + 6] = "Experiment 1";
             ws.Cells[x - 1, y + 13] = "Experiment 2";
@@ -324,10 +386,15 @@ namespace ResultCombiner
             ExpResultStore.writeResultStoreTemplate(ws, x + 3, y + 6);
             ExpResultStore.writeResultStoreTemplate(ws, x + 3, y + 13);
             ExpResultStore.writeResultStoreTemplate(ws, x + 3, y + 20);
+            Exp2Store.writeResultStoreTemplate(ws, x + 23, y + 13);
+            Exp3Store.writeResultStoreTemplate(ws, x + 31, y + 20);
 
-            _exp1QStore.writeAverageWithTemplate(ws, x, y + 6);
-            _exp2QStore.writeAverageWithTemplate(ws, x, y + 13);
-            _exp3QStore.writeAverageWithTemplate(ws, x, y + 20);
+            _exp1QStore.writeTemplate(ws, x, y + 6);
+            _exp1QStore.writeAverage(ws, x, y + 6);
+            _exp2QStore.writeTemplate(ws, x, y + 13);
+            _exp2QStore.writeAverage(ws, x, y + 13);
+            _exp3QStore.writeTemplate(ws, x, y + 20);
+            _exp3QStore.writeAverage(ws, x, y + 20);
         }
 
         /// <summary>
@@ -343,26 +410,30 @@ namespace ResultCombiner
             ws.Cells[x, y + 3] = "Experiment 3";
 
             ExpResultStore.writeResultStoreTemplate(ws, x, y);
-            Exp2Store.writeResultStoreTemplate(ws, x + 12, y);
-            Exp3Store.writeResultStoreTemplate(ws, x + 17, y);
+            Exp2Store.writeResultStoreTemplate(ws, x + 20, y);
+            Exp3Store.writeResultStoreTemplate(ws, x + 28, y);
 
             //write the basic experiment store data down a column
             _exp1Store.writeLastResultDownColumn(x, y + 1, ws);
-            ((ExpResultStore)(_exp2Store)).writeLastResultDownColumn(x, y + 2, ws);
-            _exp2Store.writeLastResultDownColumn(x + 12, y + 2, ws);
-            ((ExpResultStore)(_exp3Store)).writeLastResultDownColumn(x, y + 3, ws);
-            _exp3Store.writeLastResultDownColumn(x + 17, y + 3, ws);
+            _exp2Store.writeLastResultDownColumn(x, y + 2, ws);
+            _exp3Store.writeLastResultDownColumn(x, y + 3, ws);
 
             ws.Cells[x - 1, y + 6] = "Experiment 1";
             ws.Cells[x - 1, y + 13] = "Experiment 2";
             ws.Cells[x - 1, y + 20] = "Experiment 3";
+
             ExpResultStore.writeResultStoreTemplate(ws, x + 3, y + 6);
             ExpResultStore.writeResultStoreTemplate(ws, x + 3, y + 13);
             ExpResultStore.writeResultStoreTemplate(ws, x + 3, y + 20);
+            Exp2Store.writeResultStoreTemplate(ws, x + 23, y + 13);
+            Exp3Store.writeResultStoreTemplate(ws, x + 31, y + 20);
 
-            _exp1QStore.writeLastWithTemplate(ws, x, y + 6);
-            _exp2QStore.writeLastWithTemplate(ws, x, y + 13);
-            _exp3QStore.writeLastWithTemplate(ws, x, y + 20);
+            _exp1QStore.writeTemplate(ws, x, y + 6);
+            _exp1QStore.writeLast(ws, x, y + 6);
+            _exp2QStore.writeTemplate(ws, x, y + 13);
+            _exp2QStore.writeLast(ws, x, y + 13);
+            _exp3QStore.writeTemplate(ws, x, y + 20);
+            _exp3QStore.writeLast(ws, x, y + 20);
         }
 
         /// <summary>
@@ -384,6 +455,11 @@ namespace ResultCombiner
 
             store.vrAttention.Add(attention.vr);
             store.vrMeditation.Add(meditation.vr);
+
+            store.deltaAttentRelativeVRAndNonVR.Add((attention.vr - _baselineAttention) - (attention.nonVR - _baselineAttention));
+            store.deltaMeditationRelativeVRAndNonVR.Add((meditation.vr - _baselineMeditation) - (meditation.nonVR - _baselineMeditation));
+
+            store.calculateStandardDeviations();
         }
 
 #endregion
@@ -634,16 +710,19 @@ namespace ResultCombiner
             if (ws.Name.Contains("KB") == true)
             {
                 _exp3Store.nonVRTimesTaken.Add(tagStamps[tagStamps.Length - 1]);
+                _exp3QStore.feedbackStores[_tagScore - 1].nonVRTimesTaken.Add(tagStamps[tagStamps.Length - 1]);
+
                 _pfastestTagKB.score = (int)tagStamps[tagStamps.Length - 1];
                 _plowestTagKB.score = (int)tagStamps[tagStamps.Length - 1];
             }
             else if (ws.Name.Contains("VR") == true)
             {
                 _exp3Store.vrTimesTaken.Add(tagStamps[tagStamps.Length - 1]);
+                _exp3QStore.feedbackStores[_tagScore - 1].vrTimesTaken.Add(tagStamps[tagStamps.Length - 1]);
+
                 _pfastestTagVR.score = (int)tagStamps[tagStamps.Length - 1];
             }
         }
-
 
         private void processFireworkExperiment(Worksheet ws)
         {
@@ -721,11 +800,17 @@ namespace ResultCombiner
             {
                 _exp2Store.nonVRFireworksSpawned.Add(spawnStamps.Length);
                 _exp2Store.nonVRTotalInteractionTimes.Add(explosionStamps[explosionStamps.Length - 1]);
+
+                _exp2QStore.feedbackStores[_fireworkScore - 1].nonVRFireworksSpawned.Add(spawnStamps.Length);
+                _exp2QStore.feedbackStores[_fireworkScore - 1].nonVRTotalInteractionTimes.Add(explosionStamps[explosionStamps.Length - 1]);
             }
             else if (ws.Name.Contains("VR") == true)
             {
                 _exp2Store.vrFireworksSpawned.Add(spawnStamps.Length);
                 _exp2Store.vrTotalInteractionTimes.Add(explosionStamps[explosionStamps.Length - 1]);
+
+                _exp2QStore.feedbackStores[_fireworkScore - 1].vrFireworksSpawned.Add(spawnStamps.Length);
+                _exp2QStore.feedbackStores[_fireworkScore - 1].vrTotalInteractionTimes.Add(explosionStamps[explosionStamps.Length - 1]);
             }
 
             _pmostFireworks.score += spawnStamps.Length;
@@ -869,9 +954,9 @@ namespace ResultCombiner
             _exp2Store = new Exp2Store();
             _exp3Store = new Exp3Store();
 
-            _exp1QStore = new QuestionaireResultStore(5);
-            _exp2QStore = new QuestionaireResultStore(5);
-            _exp3QStore = new QuestionaireResultStore(5);
+            _exp1QStore = new QuestionaireResultStore<ExpResultStore>(5);
+            _exp2QStore = new QuestionaireResultStore<Exp2Store>(5);
+            _exp3QStore = new QuestionaireResultStore<Exp3Store>(5);
 
             _lowestMedBase = new UserScore("none");
             _lowestMedBase.score = 100;
@@ -888,6 +973,14 @@ namespace ResultCombiner
             _mostRelaxed = new UserScore("none");
             _mostRelaxed.score = 100;
             _longestEEG = new UserScore("none");
+
+            _relaxScores = new List<int>();
+            _fireworkScores = new List<int>();
+            _tagScores = new List<int>();
+            _gameExperiences = new List<int>();
+            _vrMapScores = new List<int>();
+            _controlSchemeRates = new List<int>();
+            _vrExperiences = new List<int>();
         }
 
         ~Program()

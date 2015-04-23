@@ -53,6 +53,44 @@ namespace ResultCombiner
         /// </summary>
         public List<int> deltaNonVRandBaselineMeditation;
 
+        /// <summary>
+        /// is = (attention VR - attention baseline) - (attention nonVR - attention baseline)
+        /// </summary>
+        public List<int> deltaAttentRelativeVRAndNonVR;
+        /// <summary>
+        /// is = (meditation VR - meditation baseline) - (meditation nonVR - meditation baseline)
+        /// </summary>
+        public List<int> deltaMeditationRelativeVRAndNonVR;
+
+        #region basic SD
+        /// <summary>
+        /// standard deviation for the VR attention - baseline attention
+        /// </summary>
+        public double relativeVRAttentionSD;
+        /// <summary>
+        /// standard deviation for non-VR attention - baseline attention
+        /// </summary>
+        public double relativeNonVRAttentionSD;
+        /// <summary>
+        /// standard deviation for the VR meditation - baseline meditation
+        /// </summary>
+        public double relativeVRMeditationSD;
+        /// <summary>
+        /// standard deviation for non-VR meditation - baseline meditation
+        /// </summary>
+        public double relativeNonVRMeditationSD;
+
+        /// <summary>
+        /// standard deviation for deltaAttentRelativeVRAndNonVR 
+        /// </summary>
+        public double deltaRelativeAttentionSD;
+        /// <summary>
+        /// standard deviation for deltaMeditationRelativeVRAndNonVR
+        /// </summary>
+        public double deltaRelativeMeditationSD;
+
+        #endregion
+
         public ExpResultStore()
         {
             nonVRAttention = new List<int>();
@@ -65,6 +103,8 @@ namespace ResultCombiner
             deltaVRnonVRMeditation = new List<int>();
             deltaVRandBaselineMeditation = new List<int>();
             deltaNonVRandBaselineMeditation = new List<int>();
+            deltaAttentRelativeVRAndNonVR = new List<int>();
+            deltaMeditationRelativeVRAndNonVR = new List<int>();
         }
 
         public static void writeResultStoreTemplate(Worksheet ws, int x, int y)
@@ -80,74 +120,73 @@ namespace ResultCombiner
             ws.Cells[x + 8, y] = "VR Meditation - Non-Vr Meditation";
             ws.Cells[x + 9, y] = "VR Meditation - Baseline Meditation";
             ws.Cells[x + 10, y] = "Non-VR Meditation - Baseline Meditation";
+            ws.Cells[x + 11, y] = "Relative Attention VR - Relative Attention Non-VR";
+            ws.Cells[x + 12, y] = "Relative Meditation VR - Relative Meditation Non-VR";
+
+            ws.Cells[x + 13, y] = "Relative VR Attention SD";
+            ws.Cells[x + 14, y] = "Relative non-VR attention SD";
+            ws.Cells[x + 15, y] = "Relative VR Meditation SD";
+            ws.Cells[x + 16, y] = "Relative non-VR Meditation SD";
+            ws.Cells[x + 17, y] = "Delta relative Vr-NonVr attention SD";
+            ws.Cells[x + 18, y] = "Delta relative Vr-NonVr meditation SD";
         }
 
-        public void writeLastResultDownColumn(int x, int y, Worksheet ws)
+        public virtual void writeLastResultDownColumn(int x, int y, Worksheet ws)
         {
-            if (nonVRAttention.Count != 0)
-                ws.Cells[x + 1, y] = getLast(nonVRAttention);
-            if (vrAttention.Count != 0)
-                ws.Cells[x + 2, y] = getLast(vrAttention);
-            if (nonVRMeditation.Count != 0)
-                ws.Cells[x + 3, y] = getLast(nonVRMeditation);
-            if (vrMeditation.Count != 0)
-                ws.Cells[x + 4, y] = getLast(vrMeditation);
-            if (deltaVRnonVRAttention.Count != 0)
-                ws.Cells[x + 5, y] = getLast(deltaVRnonVRAttention);
-            if (deltaVRandBaselineAttention.Count != 0)
-                ws.Cells[x + 6, y] = getLast(deltaVRandBaselineAttention);
-            if (deltaNonVRandBaselineAttention.Count != 0)
-                ws.Cells[x + 7, y] = getLast(deltaNonVRandBaselineAttention);
-            if (deltaVRnonVRMeditation.Count != 0)
-                ws.Cells[x + 8, y] = getLast(deltaVRnonVRMeditation);
-            if (deltaVRandBaselineMeditation.Count != 0)
-                ws.Cells[x + 9, y] = getLast(deltaVRandBaselineMeditation);
-            if (deltaNonVRandBaselineMeditation.Count != 0)
-                ws.Cells[x + 10, y] = getLast(deltaNonVRandBaselineMeditation);
+            writeDownColumnWithDelegate(x, y, ws, ListAddons.getLast);
         }
 
-        public void writeAverageDownColumn(int x, int y, Worksheet ws)
+        public virtual void writeAverageDownColumn(int x, int y, Worksheet ws)
         {
-            if (nonVRAttention.Count != 0)
-                ws.Cells[x + 1, y] = getAverage(nonVRAttention);
-            if (vrAttention.Count != 0)
-                ws.Cells[x + 2, y] = getAverage(vrAttention);
-            if (nonVRMeditation.Count != 0)
-                ws.Cells[x + 3, y] = getAverage(nonVRMeditation);
-            if (vrMeditation.Count != 0)
-                ws.Cells[x + 4, y] = getAverage(vrMeditation);
-            if (deltaVRnonVRAttention.Count != 0)
-                ws.Cells[x + 5, y] = getAverage(deltaVRnonVRAttention);
-            if (deltaVRandBaselineAttention.Count != 0)
-                ws.Cells[x + 6, y] = getAverage(deltaVRandBaselineAttention);
-            if (deltaNonVRandBaselineAttention.Count != 0)
-                ws.Cells[x + 7, y] = getAverage(deltaNonVRandBaselineAttention);
-            if (deltaVRnonVRMeditation.Count != 0)
-                ws.Cells[x + 8, y] = getAverage(deltaVRnonVRMeditation);
-            if (deltaVRandBaselineMeditation.Count != 0)
-                ws.Cells[x + 9, y] = getAverage(deltaVRandBaselineMeditation);
-            if (deltaNonVRandBaselineMeditation.Count != 0)
-                ws.Cells[x + 10, y] = getAverage(deltaNonVRandBaselineMeditation);
+            writeDownColumnWithDelegate(x, y, ws, ListAddons.getAverage);
         }  
 
-        protected int getAverage(List<int> list)
+        public virtual void writeDownColumnWithDelegate(int x, int y, Worksheet ws, GetValFromIntListDel del)
         {
-            return list.Count == 0 ? -1 : list.Sum() / list.Count;
+            if (nonVRAttention.Count != 0)
+                ws.Cells[x + 1, y] = del(nonVRAttention);
+            if (vrAttention.Count != 0)
+                ws.Cells[x + 2, y] = del(vrAttention);
+            if (nonVRMeditation.Count != 0)
+                ws.Cells[x + 3, y] = del(nonVRMeditation);
+            if (vrMeditation.Count != 0)
+                ws.Cells[x + 4, y] = del(vrMeditation);
+            if (deltaVRnonVRAttention.Count != 0)
+                ws.Cells[x + 5, y] = del(deltaVRnonVRAttention);
+            if (deltaVRandBaselineAttention.Count != 0)
+                ws.Cells[x + 6, y] = del(deltaVRandBaselineAttention);
+            if (deltaNonVRandBaselineAttention.Count != 0)
+                ws.Cells[x + 7, y] = del(deltaNonVRandBaselineAttention);
+            if (deltaVRnonVRMeditation.Count != 0)
+                ws.Cells[x + 8, y] = del(deltaVRnonVRMeditation);
+            if (deltaVRandBaselineMeditation.Count != 0)
+                ws.Cells[x + 9, y] = del(deltaVRandBaselineMeditation);
+            if (deltaNonVRandBaselineMeditation.Count != 0)
+                ws.Cells[x + 10, y] = del(deltaNonVRandBaselineMeditation);
+            if (deltaAttentRelativeVRAndNonVR.Count != 0)
+                ws.Cells[x + 11, y] = del(deltaAttentRelativeVRAndNonVR);
+            if (deltaMeditationRelativeVRAndNonVR.Count != 0)
+                ws.Cells[x + 12, y] = del(deltaMeditationRelativeVRAndNonVR);
+
+            //write the SDs
+            ws.Cells[x + 13, y] = relativeVRAttentionSD;
+            ws.Cells[x + 14, y] = relativeNonVRAttentionSD;
+            ws.Cells[x + 15, y] = relativeVRMeditationSD;
+            ws.Cells[x + 16, y] = relativeNonVRMeditationSD;
+            ws.Cells[x + 17, y] = deltaRelativeAttentionSD;
+            ws.Cells[x + 18, y] = deltaRelativeMeditationSD;
         }
 
-        protected int getLast(List<int> list)
+        public virtual void calculateStandardDeviations()
         {
-            return list.Count == 0 ? -1 : list[list.Count - 1];
-        }
+            relativeVRAttentionSD = ListAddons.getSDfromValues(deltaVRandBaselineAttention);
+            relativeNonVRAttentionSD = ListAddons.getSDfromValues(deltaNonVRandBaselineAttention);
 
-        protected double getAverage(List<double> list)
-        {
-            return list.Count == 0 ? -1 : list.Sum() / list.Count;
-        }
+            relativeVRMeditationSD = ListAddons.getSDfromValues(deltaVRandBaselineMeditation);
+            relativeNonVRMeditationSD = ListAddons.getSDfromValues(deltaNonVRandBaselineMeditation);
 
-        protected double getLast(List<double> list)
-        {
-            return list.Count == 0 ? -1 : list[list.Count - 1];
+            deltaRelativeAttentionSD = ListAddons.getSDfromValues(deltaAttentRelativeVRAndNonVR);
+            deltaRelativeMeditationSD = ListAddons.getSDfromValues(deltaMeditationRelativeVRAndNonVR);
         }
     }
 
@@ -159,38 +198,72 @@ namespace ResultCombiner
         public List<double> vrTotalInteractionTimes;
         public List<double> nonVRTotalInteractionTimes;
 
+        public double vrFireworksSpawnedSD;
+        public double nonvrFireworksSpawnedSD;
+
+        public double vrInteractionTimeSD;
+        public double nonvrInteractionTimeSD;
+
         public Exp2Store()
             : base()
         {
             vrFireworksSpawned = new List<int>();
             nonVRFireworksSpawned = new List<int>();
-
             vrTotalInteractionTimes = new List<double>();
             nonVRTotalInteractionTimes = new List<double>();
         }
 
-        public static void writeResultStoreTemplate(Worksheet ws, int x, int y)
+        public new static void writeResultStoreTemplate(Worksheet ws, int x, int y)
         {
             ws.Cells[x, y] = "Non-VR Fireworks Spawned";
             ws.Cells[x + 1, y] = "VR Fireworks Spawned";
             ws.Cells[x + 2, y] = "Non-VR Interaction Duration";
             ws.Cells[x + 3, y] = "VR Interaction Duration";
+
+            ws.Cells[x + 4, y] = "VR Fireworks spawned SD";
+            ws.Cells[x + 5, y] = "Non-VR Fireworks spawned SD";
+            ws.Cells[x + 6, y] = "VR time SD";
+            ws.Cells[x + 7, y] = "NonVR time SD";
         }
 
-        public new void writeAverageDownColumn(int x, int y, Worksheet ws)
+        public override void writeAverageDownColumn(int x, int y, Worksheet ws)
         {
-            ws.Cells[x, y] = getAverage(nonVRFireworksSpawned);
-            ws.Cells[x + 1, y] = getAverage(vrFireworksSpawned);
-            ws.Cells[x + 2, y] = getAverage(vrTotalInteractionTimes);
-            ws.Cells[x + 3, y] = getAverage(nonVRTotalInteractionTimes);
+            base.writeAverageDownColumn(x, y, ws);
+            writeFireworkResultsDownColWithDel(x + 20, y, ws, ListAddons.getAverage, ListAddons.getAverage);
         }
 
-        public new void writeLastResultDownColumn(int x, int y, Worksheet ws)
+        public override void writeLastResultDownColumn(int x, int y, Worksheet ws)
         {
-            ws.Cells[x, y] = getLast(nonVRFireworksSpawned);
-            ws.Cells[x + 1, y] = getLast(vrFireworksSpawned);
-            ws.Cells[x + 2, y] = getLast(vrTotalInteractionTimes);
-            ws.Cells[x + 3, y] = getLast(nonVRTotalInteractionTimes);
+            base.writeLastResultDownColumn(x, y, ws);
+            writeFireworkResultsDownColWithDel(x + 20, y, ws, ListAddons.getLast, ListAddons.getLast);
+        }
+
+        public void writeFireworkResultsDownColWithDel(int x, int y, Worksheet ws, GetValFromIntListDel delInt, GetValFromDoubleListDel delDouble)
+        {
+            if (nonVRFireworksSpawned.Count != 0)
+                ws.Cells[x, y] = delInt(nonVRFireworksSpawned);
+            if (vrFireworksSpawned.Count != 0)
+                ws.Cells[x + 1, y] = delInt(vrFireworksSpawned);
+            if (vrTotalInteractionTimes.Count != 0)
+                ws.Cells[x + 2, y] = delDouble(vrTotalInteractionTimes);
+            if (nonVRTotalInteractionTimes.Count != 0)
+                ws.Cells[x + 3, y] = delDouble(nonVRTotalInteractionTimes);
+
+            ws.Cells[x + 4, y] = vrFireworksSpawnedSD;
+            ws.Cells[x + 5, y] = nonvrFireworksSpawnedSD;
+            ws.Cells[x + 6, y] = vrInteractionTimeSD;
+            ws.Cells[x + 7, y] = nonvrInteractionTimeSD;
+        }
+
+        public override void calculateStandardDeviations()
+        {
+            base.calculateStandardDeviations();
+
+            vrFireworksSpawnedSD = ListAddons.getSDfromValues(vrFireworksSpawned);
+            nonvrFireworksSpawnedSD = ListAddons.getSDfromValues(nonVRFireworksSpawned);
+
+            vrInteractionTimeSD = ListAddons.getSDfromValues(vrTotalInteractionTimes);
+            nonvrInteractionTimeSD = ListAddons.getSDfromValues(nonVRTotalInteractionTimes);
         }
     }
 
@@ -198,6 +271,9 @@ namespace ResultCombiner
     {
         public List<double> vrTimesTaken;
         public List<double> nonVRTimesTaken;
+
+        public double vrTimeSD;
+        public double nonVRTimeSD;
 
         public Exp3Store()
             : base()
@@ -210,18 +286,40 @@ namespace ResultCombiner
         {
             ws.Cells[x, y] = "Non-VR Tag Duration";
             ws.Cells[x + 1, y] = "VR Tag Duration";
+
+            ws.Cells[x + 2, y] = "VR time SD";
+            ws.Cells[x + 3, y] = "NonVR time SD";
         }
 
-        public new void writeAverageDownColumn(int x, int y, Worksheet ws)
+        public override void writeAverageDownColumn(int x, int y, Worksheet ws)
         {
-            ws.Cells[x, y] = getAverage(nonVRTimesTaken);
-            ws.Cells[x + 1, y] = getAverage(vrTimesTaken);
+            base.writeAverageDownColumn(x, y, ws);
+            writeTagResultsDownColWithDel(x + 28, y, ws, ListAddons.getAverage);
         }
 
-        public new void writeLastResultDownColumn(int x, int y, Worksheet ws)
+        public override void writeLastResultDownColumn(int x, int y, Worksheet ws)
         {
-            ws.Cells[x, y] = getLast(nonVRTimesTaken);
-            ws.Cells[x + 1, y] = getLast(vrTimesTaken);
+            base.writeLastResultDownColumn(x, y, ws);
+            writeTagResultsDownColWithDel(x + 28, y, ws, ListAddons.getLast);
+        }
+
+        protected void writeTagResultsDownColWithDel(int x, int y, Worksheet ws, GetValFromDoubleListDel delDouble)
+        {
+            if (nonVRTimesTaken.Count != 0)
+                ws.Cells[x, y] = delDouble(nonVRTimesTaken);
+            if (vrTimesTaken.Count != 0)
+                ws.Cells[x + 1, y] = delDouble(vrTimesTaken);
+
+            ws.Cells[x + 2, y] = vrTimeSD;
+            ws.Cells[x + 3, y] = nonVRTimeSD;
+        }
+
+        public override void calculateStandardDeviations()
+        {
+            base.calculateStandardDeviations();
+
+            vrTimeSD = ListAddons.getSDfromValues(vrTimesTaken);
+            nonVRTimeSD = ListAddons.getSDfromValues(nonVRTimesTaken);
         }
     }
 }

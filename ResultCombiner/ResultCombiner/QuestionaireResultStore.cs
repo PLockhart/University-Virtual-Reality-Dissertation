@@ -9,15 +9,15 @@ using Microsoft.Office.Interop.Excel;
 namespace ResultCombiner
 {
 
-    class QuestionaireResultStore
+    class QuestionaireResultStore<StoreType> where StoreType : ExpResultStore, new()
     {
         /// <summary>
-        /// A list of lists, for each answer
+        /// A list of result stores, for each answer to a feedback question
         /// 1) list of results
         /// 2) list of results
         /// 3) etc
         /// </summary>
-        public List<ExpResultStore> feedbackScores;
+        public List<StoreType> feedbackStores;
 
         public List<List<int>> controlSchemeScores;
         public List<List<int>> vrMapScores;
@@ -25,33 +25,36 @@ namespace ResultCombiner
 
         public QuestionaireResultStore(int possibleAnswers)
         {
-            feedbackScores = new List<ExpResultStore>();
+            feedbackStores = new List<StoreType>();
             controlSchemeScores = new List<List<int>>();
             vrMapScores = new List<List<int>>();
             gameExperienceScores = new List<List<int>>();
 
             for (int i = 0; i < possibleAnswers; i++)
             {
-                feedbackScores.Add(new ExpResultStore());
+                feedbackStores.Add(new StoreType());
                 controlSchemeScores.Add(new List<int>());
                 vrMapScores.Add(new List<int>());
                 gameExperienceScores.Add(new List<int>());
             }
         }
 
-        public void writeAverageWithTemplate(Worksheet ws, int x, int y)
+        protected void writeDataWithDel(GetValFromIntListDel del, Worksheet ws, int x, int y, int i)
         {
-            writeTemplate(ws, x, y);
+            ws.Cells[x, y + 1 + i] = i + 1;
+            if (controlSchemeScores[i].Count != 0)
+                ws.Cells[x + 1, y + i + 1] = del(controlSchemeScores[i]);
+            if (vrMapScores[i].Count != 0)
+                ws.Cells[x + 2, y + i + 1] = del(vrMapScores[i]);
+            if (gameExperienceScores[i].Count != 0)
+                ws.Cells[x + 3, y + i + 1] = del(gameExperienceScores[i]);
+        }
 
-            for (int i = 0; i < feedbackScores.Count; i++)
+        public void writeAverage(Worksheet ws, int x, int y)
+        {
+            for (int i = 0; i < feedbackStores.Count; i++)
             {
-                ws.Cells[x, y + 1 + i] = i + 1;
-                if (controlSchemeScores[i].Count != 0)
-                    ws.Cells[x + 1, y + i + 1] = getAverage(controlSchemeScores[i]);
-                if (vrMapScores[i].Count != 0)
-                    ws.Cells[x + 2, y + i + 1] = getAverage(vrMapScores[i]);
-                if (gameExperienceScores[i].Count != 0)
-                    ws.Cells[x + 3, y + i + 1] = getAverage(gameExperienceScores[i]);
+                writeDataWithDel(ListAddons.getAverage, ws, x, y, i);
 
                 writeAverageData(ws, x + 3, y + i + 1, i);
             }
@@ -59,22 +62,14 @@ namespace ResultCombiner
 
         protected virtual void writeAverageData(Worksheet ws, int x, int y, int scoreResult)
         {
-            feedbackScores[scoreResult].writeAverageDownColumn(x, y, ws);
+            feedbackStores[scoreResult].writeAverageDownColumn(x, y, ws);
         }
 
-        public void writeLastWithTemplate(Worksheet ws, int x, int y)
+        public void writeLast(Worksheet ws, int x, int y)
         {
-            writeTemplate(ws, x, y);
-
-            for (int i = 0; i < feedbackScores.Count; i++)
+            for (int i = 0; i < feedbackStores.Count; i++)
             {
-                ws.Cells[x, y + 1 + i] = i + 1;
-                if (controlSchemeScores[i].Count != 0)
-                    ws.Cells[x + 1, y + i + 1] = getLast(controlSchemeScores[i]);
-                if (vrMapScores[i].Count != 0)
-                    ws.Cells[x + 2, y + i + 1] = getLast(vrMapScores[i]);
-                if (gameExperienceScores[i].Count != 0)
-                    ws.Cells[x + 3, y + i + 1] = getLast(gameExperienceScores[i]);
+                writeDataWithDel(ListAddons.getLast, ws, x, y, i);
 
                 writeLastData(ws, x + 3, y + i + 1, i);
             }
@@ -82,7 +77,7 @@ namespace ResultCombiner
 
         public void writeTemplate(Worksheet ws, int x, int y)
         {
-            for (int i = 0; i < feedbackScores.Count; i++)
+            for (int i = 0; i < feedbackStores.Count; i++)
             {
                 ws.Cells[x, y] = "Rated:";
                 ws.Cells[x + 3, y] = "Game Experience Score:";
@@ -93,17 +88,7 @@ namespace ResultCombiner
 
         protected virtual void writeLastData(Worksheet ws, int x, int y, int scoreResult)
         {
-            feedbackScores[scoreResult].writeLastResultDownColumn(x, y, ws);
-        }
-
-        protected int getAverage(List<int> list)
-        {
-            return list.Sum() / list.Count;
-        }
-
-        protected int getLast(List<int> list)
-        {
-            return list[list.Count - 1];
+            feedbackStores[scoreResult].writeLastResultDownColumn(x, y, ws);
         }
     }
 
