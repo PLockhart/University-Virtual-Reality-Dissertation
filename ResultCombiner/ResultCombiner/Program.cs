@@ -7,16 +7,20 @@ using System.IO;
 
 using Microsoft.Office.Interop.Excel;
 
-//TODO: create graph of average of all results from all experiments
-//compare average increase/decreate between experiment and baseline
-//then compare average increase/decreate between VR and non-VR
+//line chart to show correlation between time taken in tag and game experience
 
 namespace ResultCombiner
 {
     struct ResultsPair<T>
     {
-        public T nonVR;
-        public T vr;
+        public T a;
+        public T b;
+
+        public ResultsPair(T first, T second)
+        {
+            a = first;
+            b = second;
+        }
     }
 
     class UserScore
@@ -90,6 +94,11 @@ namespace ResultCombiner
         List<int> _vrMapScores;
         List<int> _controlSchemeRates;
         List<int> _vrExperiences;
+        List<int> _fitnessScores;
+
+        List<ResultsPair<int>> _gameControlPreferencePair;
+        List<ResultsPair<int>> _vrTagExperiencePair;
+        List<ResultsPair<int>> _nonvrTagExperiencePair;
 
         #endregion
 
@@ -198,6 +207,11 @@ namespace ResultCombiner
                             _vrMapScores.Add(_vrMapScore);
                             _controlSchemeRates.Add(_controlSchemeRate);
                             _vrExperiences.Add((int)_participantWs.Cells[9, 4].Value);
+                            _fitnessScores.Add((int)_participantWs.Cells[11, 4].Value);
+
+                            //_gameControlPreferencePair.Add(new ResultsPair<int>(_gameExperience, _relaxScore));
+                            _gameControlPreferencePair.Add(new ResultsPair<int>(_gameExperience, _fireworkScore));
+                            _gameControlPreferencePair.Add(new ResultsPair<int>(_gameExperience, _tagScore));
 
                             if ((string)_participantWs.Cells[1, 2].Value == "Male")
                                 _numMales++;
@@ -337,7 +351,6 @@ namespace ResultCombiner
             mainSheet.Cells[x + 1, y + 1] = "Female";
             mainSheet.Cells[x + 2, y + 1] = _numFemales;
 
-            //work out the SDs for each participant's stat
             mainSheet.Cells[x, y + 4] = "Average";
             mainSheet.Cells[x, y + 5] = "Rating SD";
 
@@ -364,6 +377,49 @@ namespace ResultCombiner
             mainSheet.Cells[x + 5, y + 5] = _vrMapScores.getSDfromValues();
             mainSheet.Cells[x + 6, y + 5] = _controlSchemeRates.getSDfromValues();
             mainSheet.Cells[x + 7, y + 5] = _vrExperiences.getSDfromValues();
+
+            //write VR experiences
+            mainSheet.Cells[x, y + 7] = "VR experience";
+            mainSheet.Cells[x + 1, y + 7] = "No experience";
+            mainSheet.Cells[x + 2, y + 7] = "Little experience";
+            mainSheet.Cells[x + 3, y + 7] = "Some experience";
+            mainSheet.Cells[x + 4, y + 7] = "Use somewhat regularlary";
+            mainSheet.Cells[x + 5, y + 7] = "Use regularly";
+
+            mainSheet.Cells[x + 1, y + 8] = _vrExperiences.FindAll(a => a == 1).Count;
+            mainSheet.Cells[x + 2, y + 8] = _vrExperiences.FindAll(a => a == 2).Count;
+            mainSheet.Cells[x + 3, y + 8] = _vrExperiences.FindAll(a => a == 3).Count;
+            mainSheet.Cells[x + 4, y + 8] = _vrExperiences.FindAll(a => a == 4).Count;
+            mainSheet.Cells[x + 5, y + 8] = _vrExperiences.FindAll(a => a == 5).Count;
+
+            //game experiences
+            mainSheet.Cells[x, y + 10] = "Video Game Experience";
+            mainSheet.Cells[x + 1, y + 10] = "Don't play";
+            mainSheet.Cells[x + 2, y + 10] = "Have played before";
+            mainSheet.Cells[x + 3, y + 10] = "Play from time to time";
+            mainSheet.Cells[x + 4, y + 10] = "Play often";
+            mainSheet.Cells[x + 5, y + 10] = "Play very regularly";
+
+            mainSheet.Cells[x + 1, y + 11] = _gameExperiences.FindAll(a => a == 1).Count;
+            mainSheet.Cells[x + 2, y + 11] = _gameExperiences.FindAll(a => a == 2).Count;
+            mainSheet.Cells[x + 3, y + 11] = _gameExperiences.FindAll(a => a == 3).Count;
+            mainSheet.Cells[x + 4, y + 11] = _gameExperiences.FindAll(a => a == 4).Count;
+            mainSheet.Cells[x + 5, y + 11] = _gameExperiences.FindAll(a => a == 5).Count;
+
+            //game experience - control scheme voting
+            mainSheet.Cells[x, y + 13] = "Game Experience";
+            mainSheet.Cells[x, y + 14] = "Voting Preference";
+            mainSheet.Cells[x, y + 15] = "# Entries";
+            //for each possible game experience
+            for (int i = 1; i <= 5; i++)
+            {
+                for (int j = 1; j <= 5; j++)
+                {
+                    mainSheet.Cells[x + (5 * (i - 1)) + j, y + 13] = i.ToString();
+                    mainSheet.Cells[x + (5 * (i - 1)) + j, y + 14] = j.ToString();
+                    mainSheet.Cells[x + (5 * (i - 1)) + j, y + 15] = _gameControlPreferencePair.FindAll(a => a.a == i && a.b == j).Count.ToString();
+                }
+            }
         }
         UserScore chooseLowestScore(UserScore u1, UserScore u2)
         {
@@ -421,6 +477,23 @@ namespace ResultCombiner
             _exp2QStore.writeAverage(ws, x, y + 13);
             _exp3QStore.writeTemplate(ws, x, y + 20);
             _exp3QStore.writeAverage(ws, x, y + 20);
+
+            //writing tag game vs game experience
+            ws.Cells[x + 38, y + 20] = "Game Experience";
+            ws.Cells[x + 38, y + 21] = "VR Time Taken";
+            ws.Cells[x + 38, y + 22] = "Game Experience";
+            ws.Cells[x + 38, y + 23] = "Non-VR Time Taken";
+            for (int i = 0; i < _vrTagExperiencePair.Count; i ++)
+            {
+                ws.Cells[x + 39 + i, y + 20] = _vrTagExperiencePair[i].a;
+                ws.Cells[x + 39 + i, y + 21] = _vrTagExperiencePair[i].b;
+            }
+
+            for (int i = 0; i < _nonvrTagExperiencePair.Count; i++)
+            {
+                ws.Cells[x + 39 + i, y + 22] = _nonvrTagExperiencePair[i].a;
+                ws.Cells[x + 39 + i, y + 23] = _nonvrTagExperiencePair[i].b;
+            }
         }
 
         /// <summary>
@@ -467,23 +540,23 @@ namespace ResultCombiner
         /// </summary>
         private void calulcateStoreValues(ResultsPair<int> attention, ResultsPair<int> meditation, ExpResultStore store)
         {
-            store.deltaNonVRandBaselineAttention.Add(attention.nonVR - _baselineAttention);
-            store.deltaNonVRandBaselineMeditation.Add(meditation.nonVR - _baselineMeditation);
+            store.deltaNonVRandBaselineAttention.Add(attention.a - _baselineAttention);
+            store.deltaNonVRandBaselineMeditation.Add(meditation.a - _baselineMeditation);
 
-            store.deltaVRandBaselineAttention.Add(attention.vr - _baselineAttention);
-            store.deltaVRandBaselineMeditation.Add(meditation.vr - _baselineMeditation);
+            store.deltaVRandBaselineAttention.Add(attention.b - _baselineAttention);
+            store.deltaVRandBaselineMeditation.Add(meditation.b - _baselineMeditation);
 
-            store.deltaVRnonVRAttention.Add(attention.vr - attention.nonVR);
-            store.deltaVRnonVRMeditation.Add(meditation.vr - meditation.nonVR);
+            store.deltaVRnonVRAttention.Add(attention.b - attention.a);
+            store.deltaVRnonVRMeditation.Add(meditation.b - meditation.a);
 
-            store.nonVRAttention.Add(attention.nonVR);
-            store.nonVRMeditation.Add(meditation.nonVR);
+            store.nonVRAttention.Add(attention.a);
+            store.nonVRMeditation.Add(meditation.a);
 
-            store.vrAttention.Add(attention.vr);
-            store.vrMeditation.Add(meditation.vr);
+            store.vrAttention.Add(attention.b);
+            store.vrMeditation.Add(meditation.b);
 
-            store.deltaAttentRelativeVRAndNonVR.Add((attention.vr - _baselineAttention) - (attention.nonVR - _baselineAttention));
-            store.deltaMeditationRelativeVRAndNonVR.Add((meditation.vr - _baselineMeditation) - (meditation.nonVR - _baselineMeditation));
+            store.deltaAttentRelativeVRAndNonVR.Add((attention.b - _baselineAttention) - (attention.a - _baselineAttention));
+            store.deltaMeditationRelativeVRAndNonVR.Add((meditation.b - _baselineMeditation) - (meditation.a - _baselineMeditation));
 
             store.calculateStandardDeviations();
         }
@@ -740,6 +813,8 @@ namespace ResultCombiner
 
                 _pfastestTagKB.score = (int)tagStamps[tagStamps.Length - 1];
                 _plowestTagKB.score = (int)tagStamps[tagStamps.Length - 1];
+
+                _nonvrTagExperiencePair.Add(new ResultsPair<int>(_gameExperience, (int)tagStamps[tagStamps.Length - 1]));
             }
             else if (ws.Name.Contains("VR") == true)
             {
@@ -747,6 +822,8 @@ namespace ResultCombiner
                 _exp3QStore.feedbackStores[_tagScore - 1].vrTimesTaken.Add(tagStamps[tagStamps.Length - 1]);
 
                 _pfastestTagVR.score = (int)tagStamps[tagStamps.Length - 1];
+
+                _vrTagExperiencePair.Add(new ResultsPair<int>(_gameExperience, (int)tagStamps[tagStamps.Length - 1]));
             }
         }
 
@@ -853,14 +930,14 @@ namespace ResultCombiner
 
             if (ws.Name.Contains("KB") == true)
             {
-                attentionPair.nonVR = averageAttention;
-                meditationPair.nonVR = averageMeditation;
+                attentionPair.a = averageAttention;
+                meditationPair.a = averageMeditation;
 
             }
             else if (ws.Name.Contains("VR") == true)
             {
-                attentionPair.vr = averageAttention;
-                meditationPair.vr = averageMeditation;
+                attentionPair.b = averageAttention;
+                meditationPair.b = averageMeditation;
             }
         }
 
@@ -913,6 +990,8 @@ namespace ResultCombiner
                 series2.Values = ws.get_Range("B12", "D12");
                 series2.Name = "Non-VR Meditation - Baseline";
                 series2.ErrorBar(XlErrorBarDirection.xlY, XlErrorBarInclude.xlErrorBarIncludeBoth, XlErrorBarType.xlErrorBarTypeCustom, ws.get_Range("B18", "D18"), ws.get_Range("B18", "D18"));
+
+                createBasicVerticalAxis(chartPage, "Change from Baseline");
             }
 
             //Summary VR and nonVR relative attention
@@ -936,6 +1015,8 @@ namespace ResultCombiner
                 series2.Values = ws.get_Range("B9", "D9");
                 series2.Name = "Non-VR Attention - Baseline";
                 series2.ErrorBar(XlErrorBarDirection.xlY, XlErrorBarInclude.xlErrorBarIncludeBoth, XlErrorBarType.xlErrorBarTypeCustom, ws.get_Range("B16", "D16"), ws.get_Range("B16", "D16"));
+
+                createBasicVerticalAxis(chartPage, "Change from Baseline");
             }
 
             //relative meditation comparison
@@ -944,7 +1025,7 @@ namespace ResultCombiner
                 Chart chartPage = chartObject.Chart;
                 chartPage.ChartType = XlChartType.xlColumnClustered;
                 chartPage.HasTitle = true;
-                chartPage.ChartTitle.Text = "Comparison of change in meditation, VR - non-VR";
+                chartPage.ChartTitle.Text = "Comparison of change in Meditation, VR - non-VR";
 
                 SeriesCollection sc = chartPage.SeriesCollection();
 
@@ -953,6 +1034,8 @@ namespace ResultCombiner
                 series1.XValues = ws.get_Range("B2", "D2");
                 series1.Values = ws.get_Range("B14", "D14");
                 series1.ErrorBar(XlErrorBarDirection.xlY, XlErrorBarInclude.xlErrorBarIncludeBoth, XlErrorBarType.xlErrorBarTypeCustom, ws.get_Range("B20", "D20"), ws.get_Range("B20", "D20"));
+
+                createBasicVerticalAxis(chartPage, "Difference in relative value");
             }
 
             //relative attention comparison
@@ -970,9 +1053,11 @@ namespace ResultCombiner
                 series1.XValues = ws.get_Range("B2", "D2");
                 series1.Values = ws.get_Range("B13", "D13");
                 series1.ErrorBar(XlErrorBarDirection.xlY, XlErrorBarInclude.xlErrorBarIncludeBoth, XlErrorBarType.xlErrorBarTypeCustom, ws.get_Range("B19", "D19"), ws.get_Range("B19", "D19"));
+
+                createBasicVerticalAxis(chartPage, "Difference in relative value");
             }
 
-            //firework summary
+            //firework spawn summary
             {
                 ChartObject chartObject = xlCharts.Add(5, 1550, 375, 220);
                 Chart chartPage = chartObject.Chart;
@@ -993,11 +1078,39 @@ namespace ResultCombiner
                 series2.Values = ws.get_Range("C22", "C22");
                 series2.Name = "Non-VR";
                 series2.ErrorBar(XlErrorBarDirection.xlY, XlErrorBarInclude.xlErrorBarIncludeBoth, XlErrorBarType.xlErrorBarTypeCustom, ws.get_Range("C27", "C27"), ws.get_Range("C27", "C27"));
+
+                createBasicVerticalAxis(chartPage, "Number of fireworks");
             }
+
+            //firework time summary
+            {
+                ChartObject chartObject = xlCharts.Add(5, 1800, 375, 220);
+                Chart chartPage = chartObject.Chart;
+                chartPage.ChartType = XlChartType.xlColumnClustered;
+                chartPage.HasTitle = true;
+                chartPage.ChartTitle.Text = "Firework Duration";
+
+                SeriesCollection sc = chartPage.SeriesCollection();
+
+                Series series1 = sc.NewSeries();
+                series1.XValues = ws.get_Range("C2", "C2");
+                series1.Values = ws.get_Range("C25", "C25");
+                series1.Name = "VR";
+                series1.ErrorBar(XlErrorBarDirection.xlY, XlErrorBarInclude.xlErrorBarIncludeBoth, XlErrorBarType.xlErrorBarTypeCustom, ws.get_Range("C28", "C28"), ws.get_Range("C28", "C28"));
+
+                Series series2 = sc.NewSeries();
+                series2.XValues = ws.get_Range("C2", "C2");
+                series2.Values = ws.get_Range("C24", "C24");
+                series2.Name = "Non-VR";
+                series2.ErrorBar(XlErrorBarDirection.xlY, XlErrorBarInclude.xlErrorBarIncludeBoth, XlErrorBarType.xlErrorBarTypeCustom, ws.get_Range("C29", "C29"), ws.get_Range("C29", "C29"));
+
+                createBasicVerticalAxis(chartPage, "Seconds");
+            }
+
 
             //tag summary
             {
-                ChartObject chartObject = xlCharts.Add(5, 1800, 375, 220);
+                ChartObject chartObject = xlCharts.Add(5, 2100, 375, 220);
                 Chart chartPage = chartObject.Chart;
                 chartPage.ChartType = XlChartType.xlColumnClustered;
                 chartPage.HasTitle = true;
@@ -1016,6 +1129,8 @@ namespace ResultCombiner
                 series2.Values = ws.get_Range("D30", "D30");
                 series2.Name = "Non-VR";
                 series2.ErrorBar(XlErrorBarDirection.xlY, XlErrorBarInclude.xlErrorBarIncludeBoth, XlErrorBarType.xlErrorBarTypeCustom, ws.get_Range("D33", "D33"), ws.get_Range("D33", "D33"));
+
+                createBasicVerticalAxis(chartPage, "Seconds");
             }
 
             #endregion
@@ -1037,6 +1152,9 @@ namespace ResultCombiner
                 series1.XValues = ws.get_Range("H2", "L2");
                 series1.Values = ws.get_Range("H17", "L17");
                 series1.ErrorBar(XlErrorBarDirection.xlY, XlErrorBarInclude.xlErrorBarIncludeBoth, XlErrorBarType.xlErrorBarTypeCustom, ws.get_Range("H23", "L23"), ws.get_Range("H23", "L23"));
+
+                createBasicVerticalAxis(chartPage, "Difference in relative value");
+                createBasicHoriztonalAxis(chartPage, "Relaxation preference");
             }
 
             //experiment 1 VR and nonVR relative meditation
@@ -1060,6 +1178,9 @@ namespace ResultCombiner
                 series2.Values = ws.get_Range("H15", "L15");
                 series2.Name = "Non-VR Meditation - Baseline";
                 series2.ErrorBar(XlErrorBarDirection.xlY, XlErrorBarInclude.xlErrorBarIncludeBoth, XlErrorBarType.xlErrorBarTypeCustom, ws.get_Range("H21", "L21"), ws.get_Range("H21", "L21"));
+
+                createBasicVerticalAxis(chartPage, "Change from baseline");
+                createBasicHoriztonalAxis(chartPage, "Relaxation preference");
             }
 
             //experiment 1 relative attetion comparison
@@ -1077,6 +1198,9 @@ namespace ResultCombiner
                 series1.XValues = ws.get_Range("H2", "L2");
                 series1.Values = ws.get_Range("H17", "L17");
                 series1.ErrorBar(XlErrorBarDirection.xlY, XlErrorBarInclude.xlErrorBarIncludeBoth, XlErrorBarType.xlErrorBarTypeCustom, ws.get_Range("H22", "L22"), ws.get_Range("H22", "L22"));
+
+                createBasicVerticalAxis(chartPage, "Difference in relative values");
+                createBasicHoriztonalAxis(chartPage, "Relaxation preference");
             }
 
             //experiment 1 VR and nonVR attention relative
@@ -1100,6 +1224,9 @@ namespace ResultCombiner
                 series2.Values = ws.get_Range("H12", "L12");
                 series2.Name = "Non-VR Attention - Baseline";
                 series2.ErrorBar(XlErrorBarDirection.xlY, XlErrorBarInclude.xlErrorBarIncludeBoth, XlErrorBarType.xlErrorBarTypeCustom, ws.get_Range("H19", "L19"), ws.get_Range("H19", "L19"));
+
+                createBasicVerticalAxis(chartPage, "Change from baseline");
+                createBasicHoriztonalAxis(chartPage, "Relaxation preference");
             }
 
             #endregion
@@ -1121,6 +1248,9 @@ namespace ResultCombiner
                 series1.XValues = ws.get_Range("O2", "S2");
                 series1.Values = ws.get_Range("O17", "S17");
                 series1.ErrorBar(XlErrorBarDirection.xlY, XlErrorBarInclude.xlErrorBarIncludeBoth, XlErrorBarType.xlErrorBarTypeCustom, ws.get_Range("O22", "S22"), ws.get_Range("O22", "S22"));
+
+                createBasicVerticalAxis(chartPage, "Difference in relative values");
+                createBasicHoriztonalAxis(chartPage, "Firework preference");
             }
 
             //experiment 2 VR and nonVR attention relative
@@ -1144,11 +1274,14 @@ namespace ResultCombiner
                 series2.Values = ws.get_Range("O12", "S12");
                 series2.Name = "Non-VR Attention - Baseline";
                 series2.ErrorBar(XlErrorBarDirection.xlY, XlErrorBarInclude.xlErrorBarIncludeBoth, XlErrorBarType.xlErrorBarTypeCustom, ws.get_Range("O19", "S19"), ws.get_Range("O19", "S19"));
+
+                createBasicVerticalAxis(chartPage, "Change from baseline");
+                createBasicHoriztonalAxis(chartPage, "Firework preference");
             }
 
             //experiment 2 fireworks spawned
             {
-                ChartObject chartObject = xlCharts.Add(800, 1050, 375, 220);
+                ChartObject chartObject = xlCharts.Add(800, 1100, 375, 220);
                 Chart chartPage = chartObject.Chart;
                 chartPage.ChartType = XlChartType.xlColumnClustered;
                 chartPage.HasTitle = true;
@@ -1167,6 +1300,9 @@ namespace ResultCombiner
                 series2.Values = ws.get_Range("O25", "S25");
                 series2.Name = "Non-VR";
                 series2.ErrorBar(XlErrorBarDirection.xlY, XlErrorBarInclude.xlErrorBarIncludeBoth, XlErrorBarType.xlErrorBarTypeCustom, ws.get_Range("O30", "S30"), ws.get_Range("O30", "S30"));
+
+                createBasicVerticalAxis(chartPage, "Number of fireworks");
+                createBasicHoriztonalAxis(chartPage, "Firework preference");
             }
 
             //experiment 2 firework duration
@@ -1190,6 +1326,9 @@ namespace ResultCombiner
                 series2.Values = ws.get_Range("O27", "S27");
                 series2.Name = "Non-VR";
                 series2.ErrorBar(XlErrorBarDirection.xlY, XlErrorBarInclude.xlErrorBarIncludeBoth, XlErrorBarType.xlErrorBarTypeCustom, ws.get_Range("O32", "S32"), ws.get_Range("O32", "S32"));
+
+                createBasicVerticalAxis(chartPage, "Seconds");
+                createBasicHoriztonalAxis(chartPage, "Firework preference");
             }
 
             #endregion
@@ -1211,6 +1350,9 @@ namespace ResultCombiner
                 series1.XValues = ws.get_Range("V2", "Z2");
                 series1.Values = ws.get_Range("V17", "Z17");
                 series1.ErrorBar(XlErrorBarDirection.xlY, XlErrorBarInclude.xlErrorBarIncludeBoth, XlErrorBarType.xlErrorBarTypeCustom, ws.get_Range("V22", "Z22"), ws.get_Range("V22", "Z22"));
+
+                createBasicVerticalAxis(chartPage, "Difference in relative values");
+                createBasicHoriztonalAxis(chartPage, "Tag preference");
             }
 
             //experiment 3 VR and nonVR attention relative
@@ -1234,6 +1376,9 @@ namespace ResultCombiner
                 series2.Values = ws.get_Range("V12", "Z12");
                 series2.Name = "Non-VR Attention - Baseline";
                 series2.ErrorBar(XlErrorBarDirection.xlY, XlErrorBarInclude.xlErrorBarIncludeBoth, XlErrorBarType.xlErrorBarTypeCustom, ws.get_Range("V19", "Z19"), ws.get_Range("V19", "Z19"));
+
+                createBasicVerticalAxis(chartPage, "Change from baseline");
+                createBasicHoriztonalAxis(chartPage, "Tag preference");
             }
 
             //experiment 3 duration
@@ -1257,6 +1402,79 @@ namespace ResultCombiner
                 series2.Values = ws.get_Range("V33", "Z33");
                 series2.Name = "Non-VR";
                 series2.ErrorBar(XlErrorBarDirection.xlY, XlErrorBarInclude.xlErrorBarIncludeBoth, XlErrorBarType.xlErrorBarTypeCustom, ws.get_Range("V36", "Z36"), ws.get_Range("V36", "Z36"));
+
+                createBasicVerticalAxis(chartPage, "Seconds");
+                createBasicHoriztonalAxis(chartPage, "Tag preference");
+            }
+
+            /*
+            //correlation for game experience vs time taken
+            {
+                ChartObject chartObject = xlCharts.Add(1200, 1300, 375, 220);
+                Chart chartPage = chartObject.Chart;
+                chartPage.ChartType = XlChartType.xlXYScatter;
+                chartPage.HasTitle = true;
+                chartPage.ChartTitle.Text = "Game Experience vs Tag Time";
+                chartPage.HasLegend = true;
+
+                SeriesCollection sc = chartPage.SeriesCollection();
+
+                Series series1 = sc.NewSeries();
+                series1.XValues = ws.get_Range("U41", "U" + (41 + _vrTagExperiencePair.Count).ToString());
+                series1.Values = ws.get_Range("V41", "V" + (41 + _vrTagExperiencePair.Count).ToString());
+                series1.Name = "VR";
+                series1.Trendlines().Add(XlTrendlineType.xlLinear);
+
+                Series series2 = sc.NewSeries();
+                series2.XValues = ws.get_Range("W41", "W" + (41 + _vrTagExperiencePair.Count).ToString());
+                series2.Values = ws.get_Range("X41", "X" + (41 + _vrTagExperiencePair.Count).ToString());
+                series2.Name = "Non-VR";
+                series2.Trendlines().Add(XlTrendlineType.xlLinear);
+
+                createBasicVerticalAxis(chartPage, "Seconds");
+                createBasicHoriztonalAxis(chartPage, "Video game experience");
+            }
+             * */
+            //correlation for game experience vs time taken
+            {
+                ChartObject chartObject = xlCharts.Add(1200, 1300, 375, 220);
+                Chart chartPage = chartObject.Chart;
+                chartPage.ChartType = XlChartType.xlXYScatter;
+                chartPage.HasTitle = true;
+                chartPage.ChartTitle.Text = "Game Experience vs VR Tag Time";
+                chartPage.HasLegend = true;
+
+                SeriesCollection sc = chartPage.SeriesCollection();
+
+                Series series1 = sc.NewSeries();
+                series1.XValues = ws.get_Range("U41", "U" + (41 + _vrTagExperiencePair.Count).ToString());
+                series1.Values = ws.get_Range("V41", "V" + (41 + _vrTagExperiencePair.Count).ToString());
+                series1.Name = "VR";
+                series1.Trendlines().Add(XlTrendlineType.xlLinear);
+
+                createBasicVerticalAxis(chartPage, "Seconds");
+                createBasicHoriztonalAxis(chartPage, "Video game experience");
+            }
+
+            //correlation for game experience vs time taken
+            {
+                ChartObject chartObject = xlCharts.Add(1200, 1550, 375, 220);
+                Chart chartPage = chartObject.Chart;
+                chartPage.ChartType = XlChartType.xlXYScatter;
+                chartPage.HasTitle = true;
+                chartPage.ChartTitle.Text = "Game Experience vs Non-VR Tag Time";
+                chartPage.HasLegend = true;
+
+                SeriesCollection sc = chartPage.SeriesCollection();
+
+                Series series2 = sc.NewSeries();
+                series2.XValues = ws.get_Range("W41", "W" + (41 + _vrTagExperiencePair.Count).ToString());
+                series2.Values = ws.get_Range("X41", "X" + (41 + _vrTagExperiencePair.Count).ToString());
+                series2.Name = "Non-VR";
+                series2.Trendlines().Add(XlTrendlineType.xlLinear);
+
+                createBasicVerticalAxis(chartPage, "Seconds");
+                createBasicHoriztonalAxis(chartPage, "Video game experience");
             }
 
             #endregion
@@ -1294,10 +1512,99 @@ namespace ResultCombiner
                 series1.XValues = ws.get_Range("AE2", "AE8");
                 series1.Name = "Preference";
                 series1.ErrorBar(XlErrorBarDirection.xlY, XlErrorBarInclude.xlErrorBarIncludeBoth, XlErrorBarType.xlErrorBarTypeCustom, ws.get_Range("AG2", "AG8"), ws.get_Range("AG2", "AG8"));
+
+                var yAxis = chartPage.Axes(XlAxisType.xlValue, XlAxisGroup.xlPrimary);
+                yAxis.HasTitle = true;
+                yAxis.AxisTitle.Text = "Rating";
+                yAxis.AxisTitle.Orientation = XlOrientation.xlHorizontal;
+            }
+
+            //Oculus experience
+            {
+                ChartObject chartObject = xlCharts.Add(1600, 850, 375, 220);
+                Chart chartPage = chartObject.Chart;
+                chartPage.ChartType = XlChartType.xlPie;
+                chartPage.HasTitle = true;
+                chartPage.ChartTitle.Text = "VR Breakdown";
+                chartPage.HasLegend = true;
+
+                chartPage.SetSourceData(ws.get_Range("AI2", "AJ6"));
+            }
+
+            //Video Game Experience
+            {
+                ChartObject chartObject = xlCharts.Add(2000, 850, 375, 220);
+                Chart chartPage = chartObject.Chart;
+                chartPage.ChartType = XlChartType.xlPie;
+                chartPage.HasTitle = true;
+                chartPage.ChartTitle.Text = "Game Experience Breakdown";
+                chartPage.HasLegend = true;
+
+                chartPage.SetSourceData(ws.get_Range("AL2", "AM6"));
+            }
+
+            //voting preference
+            {
+                ChartObject chartObject = xlCharts.Add(2400, 600, 375, 220);
+                Chart chartPage = chartObject.Chart;
+                chartPage.ChartType = XlChartType.xlBubble;
+                chartPage.HasTitle = true;
+                chartPage.ChartTitle.Text = "Control Scheme Voting Preference";
+                chartPage.HasLegend = true;
+
+                SeriesCollection sc = chartPage.SeriesCollection();
+
+                //chartPage.SetSourceData(ws.get_Range("AO1", "AQ26"));
+                for (int i = 1; i <= 5; i++)
+                {
+                    Series newSeries = sc.NewSeries();
+                    int expStartRow = 2 + ((i - 1) * 5);
+
+                    newSeries.Values = ws.get_Range("AP" + expStartRow.ToString(), "AP" + (expStartRow + 5).ToString());
+                    newSeries.XValues = ws.get_Range("AO" + expStartRow.ToString(), "AO" + (expStartRow + 5).ToString());
+                    newSeries.BubbleSizes = ws.get_Range("AQ" + expStartRow.ToString(), "AQ" + (expStartRow + 5).ToString());
+
+                    switch (i)
+                    {
+                        case 1:
+                            newSeries.Name = "No experience";
+                            break;
+                        case 2:
+                            newSeries.Name = "Little experience";
+                            break;
+                        case 3:
+                            newSeries.Name = "Some experience";
+                            break;
+                        case 4:
+                            newSeries.Name = "Use somewhat regularlary";
+                            break;
+                        case 5:
+                            newSeries.Name = "Use regularly";
+                            break;
+                    }
+                }
+
+                createBasicVerticalAxis(chartPage, "Control scheme preference");
+                createBasicHoriztonalAxis(chartPage, "Video game experience");
             }
 
             #endregion
 
+        }
+
+        private static void createBasicVerticalAxis(Chart chartPage, string text)
+        {
+            var yAxis = chartPage.Axes(XlAxisType.xlValue, XlAxisGroup.xlPrimary);
+            yAxis.HasTitle = true;
+            yAxis.AxisTitle.Text = text;
+            yAxis.AxisTitle.Orientation = XlOrientation.xlUpward;
+        }
+
+        private static void createBasicHoriztonalAxis(Chart chartPage, string text)
+        {
+            var xAxis = chartPage.Axes(XlAxisType.xlCategory, XlAxisGroup.xlPrimary);
+            xAxis.HasTitle = true;
+            xAxis.AxisTitle.Text = text;
         }
 
         private Series createSeriesForSingleData(SeriesCollection sc, Worksheet ws, string valueCoord, string xValueCoord, string name)
@@ -1432,6 +1739,11 @@ namespace ResultCombiner
             _vrMapScores = new List<int>();
             _controlSchemeRates = new List<int>();
             _vrExperiences = new List<int>();
+            _fitnessScores = new List<int>();
+            _gameControlPreferencePair = new List<ResultsPair<int>>();
+
+            _vrTagExperiencePair = new List<ResultsPair<int>>();
+            _nonvrTagExperiencePair = new List<ResultsPair<int>>();
         }
 
         ~Program()
