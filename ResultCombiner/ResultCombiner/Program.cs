@@ -1196,7 +1196,7 @@ namespace ResultCombiner
                 Series series1 = sc.NewSeries();
                 series1.Name = "Relative VR - Relative non-VR";
                 series1.XValues = ws.get_Range("H2", "L2");
-                series1.Values = ws.get_Range("H17", "L17");
+                series1.Values = ws.get_Range("H16", "L16");
                 series1.ErrorBar(XlErrorBarDirection.xlY, XlErrorBarInclude.xlErrorBarIncludeBoth, XlErrorBarType.xlErrorBarTypeCustom, ws.get_Range("H22", "L22"), ws.get_Range("H22", "L22"));
 
                 createBasicVerticalAxis(chartPage, "Difference in relative values");
@@ -1246,7 +1246,7 @@ namespace ResultCombiner
                 Series series1 = sc.NewSeries();
                 series1.Name = "Relative VR - Relative non-VR";
                 series1.XValues = ws.get_Range("O2", "S2");
-                series1.Values = ws.get_Range("O17", "S17");
+                series1.Values = ws.get_Range("O16", "S16");
                 series1.ErrorBar(XlErrorBarDirection.xlY, XlErrorBarInclude.xlErrorBarIncludeBoth, XlErrorBarType.xlErrorBarTypeCustom, ws.get_Range("O22", "S22"), ws.get_Range("O22", "S22"));
 
                 createBasicVerticalAxis(chartPage, "Difference in relative values");
@@ -1348,7 +1348,7 @@ namespace ResultCombiner
                 Series series1 = sc.NewSeries();
                 series1.Name = "Relative VR - Relative non-VR";
                 series1.XValues = ws.get_Range("V2", "Z2");
-                series1.Values = ws.get_Range("V17", "Z17");
+                series1.Values = ws.get_Range("V16", "Z16");
                 series1.ErrorBar(XlErrorBarDirection.xlY, XlErrorBarInclude.xlErrorBarIncludeBoth, XlErrorBarType.xlErrorBarTypeCustom, ws.get_Range("V22", "Z22"), ws.get_Range("V22", "Z22"));
 
                 createBasicVerticalAxis(chartPage, "Difference in relative values");
